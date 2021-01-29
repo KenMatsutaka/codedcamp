@@ -24,31 +24,30 @@ $addressPagingInfo = array("hitCount" => 0, "resultList" => array(), "existPrevP
   $link = getDBLink();
   if (isset($_POST["searchMethod"])) {
     $searchMethod = $_POST["searchMethod"];
-    // 郵便番号検索
+    if (isset($_POST["zipcode"])) {
+      $zipcode = $_POST["zipcode"];
+    }
+    // 都道府県
+    if (isset($_POST["pref"])) {
+      $pref = $_POST["pref"];
+    }
+    // 市区町村
+    if (isset($_POST["localGov"])) {
+      $localGov = $_POST["localGov"];
+    }
+    // 現在ページ
+    if(isset($_POST["pageNum"])) {
+      $pageNum = intval($_POST["pageNum"]);
+    }
+
+    // 郵便番号検索の場合
     if ($searchMethod === "zipcode") {
-      if (isset($_POST["zipcode"])) {
-        $zipcode = $_POST["zipcode"];
-      }
-      if(isset($_POST["pageNum"])) {
-        $pageNum = intval($_POST["pageNum"]);
-      }
       // TODO 入力チェック
       // 検索処理実行
       $resultList = findAddress($link, $zipcode, null, null);
       $addressPagingInfo = calcPagingInfo($resultList, $pageNum);
-    // 地名から検索
+    // 地名から検索の場合
     } else {
-      // 都道府県
-      if (isset($_POST["pref"])) {
-        $pref = $_POST["pref"];
-      }
-      if(isset($_POST["pageNum"])) {
-        $pageNum = intval($_POST["pageNum"]);
-      }
-      // 市区町村
-      if (isset($_POST["localGov"])) {
-        $localGov = $_POST["localGov"];
-      }
       // TODO 入力チェック
       // 検索処理実行
       $resultList = findAddress($link, null, $pref, $localGov);
@@ -96,7 +95,6 @@ function calcPagingInfo($originalList, $pageNum) {
   $existNextPage = false;
   if ($hitCount !== 0) {
     if($pageNum !== 1) {
-      print $pageNum;
       $existPrevPage = true;
     }
     if ($pageNum < $totalPageCount) {
@@ -305,64 +303,64 @@ function getDBLink() {
     <section>
       <h2>郵便番号から検索</h2>
       <form method="POST" id="searchForm">
-        <input type="text" name="zipcode" placeholder="例）1010001" value="0600000">
+        <input type="text" name="zipcode" placeholder="例）1010001" value="<?php print $zipcode;?>">
         <input type="hidden" id="searchMethod" name="searchMethod" value="">
         <input type="hidden" id="pageNum" name="pageNum" value="<?php print $pageNum?>">
         <input type="submit" id="zipcodeSearch" value="検索">
         <h2>地名から検索</h2>
         都道府県を選択
         <select name="pref">
-          <option value="" selected>都道府県を選択</option>
-          <option value="北海道"  selected>北海道</option>
-          <option value="青森県" >青森県</option>
-          <option value="岩手県" >岩手県</option>
-          <option value="宮城県" >宮城県</option>
-          <option value="秋田県" >秋田県</option>
-          <option value="山形県" >山形県</option>
-          <option value="福島県" >福島県</option>
-          <option value="茨城県" >茨城県</option>
-          <option value="栃木県" >栃木県</option>
-          <option value="群馬県" >群馬県</option>
-          <option value="埼玉県" >埼玉県</option>
-          <option value="千葉県">千葉県</option>
-          <option value="東京都" >東京都</option>
-          <option value="神奈川県" >神奈川県</option>
-          <option value="新潟県" >新潟県</option>
-          <option value="富山県" >富山県</option>
-          <option value="石川県" >石川県</option>
-          <option value="福井県" >福井県</option>
-          <option value="山梨県" >山梨県</option>
-          <option value="長野県" >長野県</option>
-          <option value="岐阜県" >岐阜県</option>
-          <option value="静岡県" >静岡県</option>
-          <option value="愛知県" >愛知県</option>
-          <option value="三重県" >三重県</option>
-          <option value="滋賀県" >滋賀県</option>
-          <option value="京都府" >京都府</option>
-          <option value="大阪府" >大阪府</option>
-          <option value="兵庫県" >兵庫県</option>
-          <option value="奈良県" >奈良県</option>
-          <option value="和歌山県" >和歌山県</option>
-          <option value="鳥取県" >鳥取県</option>
-          <option value="島根県" >島根県</option>
-          <option value="岡山県" >岡山県</option>
-          <option value="広島県" >広島県</option>
-          <option value="山口県" >山口県</option>
-          <option value="徳島県" >徳島県</option>
-          <option value="香川県" >香川県</option>
-          <option value="愛媛県" >愛媛県</option>
-          <option value="高知県" >高知県</option>
-          <option value="福岡県" >福岡県</option>
-          <option value="佐賀県" >佐賀県</option>
-          <option value="長崎県" >長崎県</option>
-          <option value="熊本県" >熊本県</option>
-          <option value="大分県" >大分県</option>
-          <option value="宮崎県" >宮崎県</option>
-          <option value="鹿児島県" >鹿児島県</option>
-          <option value="沖縄県" >沖縄県</option>
+          <option value="">都道府県を選択</option>
+          <option value="北海道" <?php if ($pref === "北海道") {?>selected<?php }?>>北海道</option>
+          <option value="青森県" <?php if ($pref === "青森県") {?>selected<?php }?>>青森県</option>
+          <option value="岩手県" <?php if ($pref === "岩手県") {?>selected<?php }?>>岩手県</option>
+          <option value="宮城県" <?php if ($pref === "宮城県") {?>selected<?php }?>>宮城県</option>
+          <option value="秋田県" <?php if ($pref === "秋田県") {?>selected<?php }?>>秋田県</option>
+          <option value="山形県" <?php if ($pref === "山形県") {?>selected<?php }?>>山形県</option>
+          <option value="福島県" <?php if ($pref === "福島県") {?>selected<?php }?>>福島県</option>
+          <option value="茨城県" <?php if ($pref === "茨城県") {?>selected<?php }?>>茨城県</option>
+          <option value="栃木県" <?php if ($pref === "栃木県") {?>selected<?php }?>>栃木県</option>
+          <option value="群馬県" <?php if ($pref === "群馬県") {?>selected<?php }?>>群馬県</option>
+          <option value="埼玉県" <?php if ($pref === "埼玉県") {?>selected<?php }?>>埼玉県</option>
+          <option value="千葉県" <?php if ($pref === "千葉県") {?>selected<?php }?>>千葉県</option>
+          <option value="東京都" <?php if ($pref === "東京都") {?>selected<?php }?>>東京都</option>
+          <option value="神奈川県" <?php if ($pref === "神奈川県") {?>selected<?php }?>>神奈川県</option>
+          <option value="新潟県" <?php if ($pref === "新潟県") {?>selected<?php }?>>新潟県</option>
+          <option value="富山県" <?php if ($pref === "富山県") {?>selected<?php }?>>富山県</option>
+          <option value="石川県" <?php if ($pref === "石川県") {?>selected<?php }?>>石川県</option>
+          <option value="福井県" <?php if ($pref === "福井県") {?>selected<?php }?>>福井県</option>
+          <option value="山梨県" <?php if ($pref === "山梨県") {?>selected<?php }?>>山梨県</option>
+          <option value="長野県" <?php if ($pref === "長野県") {?>selected<?php }?>>長野県</option>
+          <option value="岐阜県" <?php if ($pref === "岐阜県") {?>selected<?php }?>>岐阜県</option>
+          <option value="静岡県" <?php if ($pref === "静岡県") {?>selected<?php }?>>静岡県</option>
+          <option value="愛知県" <?php if ($pref === "愛知県") {?>selected<?php }?>>愛知県</option>
+          <option value="三重県" <?php if ($pref === "三重県") {?>selected<?php }?>>三重県</option>
+          <option value="滋賀県" <?php if ($pref === "滋賀県") {?>selected<?php }?>>滋賀県</option>
+          <option value="京都府" <?php if ($pref === "京都府") {?>selected<?php }?>>京都府</option>
+          <option value="大阪府" <?php if ($pref === "大阪府") {?>selected<?php }?>>大阪府</option>
+          <option value="兵庫県" <?php if ($pref === "兵庫県") {?>selected<?php }?>>兵庫県</option>
+          <option value="奈良県" <?php if ($pref === "奈良県") {?>selected<?php }?>>奈良県</option>
+          <option value="和歌山県" <?php if ($pref === "和歌山県") {?>selected<?php }?>>和歌山県</option>
+          <option value="鳥取県" <?php if ($pref === "鳥取県") {?>selected<?php }?>>鳥取県</option>
+          <option value="島根県" <?php if ($pref === "島根県") {?>selected<?php }?>>島根県</option>
+          <option value="岡山県" <?php if ($pref === "岡山県") {?>selected<?php }?>>岡山県</option>
+          <option value="広島県" <?php if ($pref === "広島県") {?>selected<?php }?>>広島県</option>
+          <option value="山口県" <?php if ($pref === "山口県") {?>selected<?php }?>>山口県</option>
+          <option value="徳島県" <?php if ($pref === "徳島県") {?>selected<?php }?>>徳島県</option>
+          <option value="香川県" <?php if ($pref === "香川県") {?>selected<?php }?>>香川県</option>
+          <option value="愛媛県" <?php if ($pref === "愛媛県") {?>selected<?php }?>>愛媛県</option>
+          <option value="高知県" <?php if ($pref === "高知県") {?>selected<?php }?>>高知県</option>
+          <option value="福岡県" <?php if ($pref === "福岡県") {?>selected<?php }?>>福岡県</option>
+          <option value="佐賀県" <?php if ($pref === "佐賀県") {?>selected<?php }?>>佐賀県</option>
+          <option value="長崎県" <?php if ($pref === "長崎県") {?>selected<?php }?>>長崎県</option>
+          <option value="熊本県" <?php if ($pref === "熊本県") {?>selected<?php }?>>熊本県</option>
+          <option value="大分県" <?php if ($pref === "大分県") {?>selected<?php }?>>大分県</option>
+          <option value="宮崎県" <?php if ($pref === "宮崎県") {?>selected<?php }?>>宮崎県</option>
+          <option value="鹿児島県" <?php if ($pref === "鹿児島県") {?>selected<?php }?>>鹿児島県</option>
+          <option value="沖縄県" <?php if ($pref === "沖縄県") {?>selected<?php }?>>沖縄県</option>
         </select>
         市区町村
-        <input type="text" name="localGov" value="札幌市中央">
+        <input type="text" name="localGov" value="<?php print $localGov;?>">
         <input type="submit" id="addressSearch" value="検索">
       </form>
     </section>
@@ -378,7 +376,7 @@ function getDBLink() {
       </tr>
       <?php foreach($addressPagingInfo["resultList"] as $rowMap) {?>
       <tr>
-        <td><?php print htmlspecialchars($rowMap["addressId"].":".$rowMap["zip"]);?></td>
+        <td><?php print htmlspecialchars($rowMap["zip"]);?></td>
         <td><?php print htmlspecialchars($rowMap["pref"]);?></td>
         <td><?php print htmlspecialchars($rowMap["localGov"]);?></td>
         <td><?php print htmlspecialchars($rowMap["area"]);?></td>
