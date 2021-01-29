@@ -1,6 +1,3 @@
---データベースの作成
-CREATE DATABASE codecampdb;
-
 --ログイン画面で作成したDDLなど
 
 --■ユーザテーブル
