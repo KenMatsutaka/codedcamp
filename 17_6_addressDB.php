@@ -4,7 +4,7 @@
  * 住所検索をDBを使用して作成する。
  * 接続先URL：http://localhost:80/codecamp/17_6_addressDB.php
  */
-// 画面入力情報 ----------
+// 画面入力情報 ==========
 // 郵便番号
 $zipcode = "";
 // 都道府県
@@ -14,16 +14,21 @@ $localGov = "";
 // 現在のページ
 $pageNum = 1;
 
-// 画面出力情報 ----------
+// 画面出力情報 ==========
 // 住所ページング情報
 $addressPagingInfo = array("hitCount" => 0, "resultList" => array(), "existPrevPage" => false,  "existNextPage" => false);
+// エラーメッセージ情報
+$errorMessages = [];
 
- if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  // メイン処理 開始 ------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // メイン処理 開始 ==========
   // DBコネクション取得
   $link = getDBLink();
   if (isset($_POST["searchMethod"])) {
+    // 入力項目の取得 ----------
+    // 検索メソッド
     $searchMethod = $_POST["searchMethod"];
+    //　郵便番号
     if (isset($_POST["zipcode"])) {
       $zipcode = $_POST["zipcode"];
     }
@@ -39,28 +44,63 @@ $addressPagingInfo = array("hitCount" => 0, "resultList" => array(), "existPrevP
     if(isset($_POST["pageNum"])) {
       $pageNum = intval($_POST["pageNum"]);
     }
-
-    // 郵便番号検索の場合
-    if ($searchMethod === "zipcode") {
-      // TODO 入力チェック
-      // 検索処理実行
-      $resultList = findAddress($link, $zipcode, null, null);
-      $addressPagingInfo = calcPagingInfo($resultList, $pageNum);
-    // 地名から検索の場合
-    } else {
-      // TODO 入力チェック
-      // 検索処理実行
-      $resultList = findAddress($link, null, $pref, $localGov);
+    // 入力チェック ----------
+    if (checkInputValue()) {    // 検索処理 ----------
+      if ($searchMethod === "zipcode") {
+        $resultList = findAddress($link, $zipcode, null, null);
+      } else {
+        $resultList = findAddress($link, null, $pref, $localGov);
+      }
+      // ページング情報の計算 ----------
       $addressPagingInfo = calcPagingInfo($resultList, $pageNum);
     }
   }
   // DBコネクションクローズ
   mysqli_close($link);
-  // メイン処理 終了 ------------
+  // メイン処理 終了 ==========
 }
 
 /**
+ * 入力チェック処理を行う。
+ * @return チェック結果 true:入力エラーなし false:入力チェックエラーあり
+ */
+function checkInputValue() {
+  global $searchMethod, $zipcode, $pref, $localGov;
+  global $errorMessages;
+  if ($searchMethod === "zipcode") {
+    // 郵便番号 ----------
+    // 必須チェック
+    if (!checkNotEmpty($zipcode)) {
+      $errorMessages[] = "郵便番号は必須です。";
+    }
+    // 郵便番号チェック
+    if (!checkZipcode($zipcode)) {
+      $errorMessages[] = "郵便番号は7桁の数字で入力してください。";
+    }
+  } else {
+    // 都道府県 ----------
+    // 必須チェック
+    if (!checkNotEmpty($pref)) {
+      $errorMessages[] = "都道府県は必須です。";
+    }
+    // 市区町村 ----------
+    // 必須チェック
+    if (!checkNotEmpty($localGov)) {
+      $errorMessages[] = "市区町村は必須です。";
+    }
+  }
+  
+  // チェック結果の判定
+  $retFlag = false;
+  if (count($errorMessages) === 0) {
+    $retFlag = true;
+  }
+  return $retFlag;
+}
+/**
  * ページング情報を計算する
+ * @param $originalList 検索結果
+ * @param $pageNum 表示ページ数
  */
 function calcPagingInfo($originalList, $pageNum) {
   $retMap;
@@ -174,7 +214,6 @@ function findAddress($link, $zipcode, $pref, $localGov) {
   // メモリのクリア
   mysqli_free_result($result);
   return $retList;
-
 }
 
 // ユーティリティ ----------
@@ -205,6 +244,19 @@ function checkMaxlength($value, $maxLength) {
   return $retFlag;
 }
 
+/**
+ * 郵便番号として妥当かチェックを行う
+ * @param $value 入力値
+ */
+function checkZipcode($value) {
+  $retFlg = true;
+  if (checkNotEmpty($value)) {
+    if (!preg_match("/[0-9]{7}/", $value)) {
+      $retFlg = false;
+    }
+  }
+  return $retFlg;
+}
 /**
  * データベースコネクションを取得する。
  * @return データベースコネクション
@@ -296,9 +348,15 @@ function getDBLink() {
           caption {
               text-align: left;
           }
+          .errorMessage {
+            color: #FF0000;
+          }
       </style>
   </head>
   <body>
+    <?php foreach($errorMessages as $errorMessage) { ?>
+      <p class="errorMessage"><?php print $errorMessage ?></p>
+    <?php } ?>
     <h1>郵便番号検索</h1>
     <section>
       <h2>郵便番号から検索</h2>
