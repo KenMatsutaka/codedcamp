@@ -98,54 +98,6 @@ function checkInputValue() {
   }
   return $retFlag;
 }
-/**
- * ページング情報を計算する
- * @param $originalList 検索結果
- * @param $pageNum 表示ページ数
- */
-function calcPagingInfo($originalList, $pageNum) {
-  $retMap;
-  // 検索件数
-  $hitCount = count($originalList);
-  $retMap["hitCount"] = $hitCount;
-  //表示件数
-  $dispCount = 10;
-  $retMap["dispCount"] = $dispCount;
-  //総ページ数
-  $totalPageCount = floor($hitCount / $dispCount);
-  if ($hitCount % $dispCount > 0) {
-    $totalPageCount++;
-  }
-  $retMap["totalPageCount"] = $totalPageCount;
-  // 開始インデックス
-  $startIndex = ($pageNum - 1) * $dispCount;
-  $retMap["startIndex"] = $startIndex;
-  // 終了インデックス
-  $endIndex = $startIndex + $dispCount;
-  if($hitCount < $endIndex) {
-    $endIndex = $hitCount;
-  }
-  // 検索結果
-  $resultList = [];
-  for ($index = $startIndex; $index < $endIndex; $index++) {
-    $resultList[] = $originalList[$index];
-  }
-  $retMap["resultList"] = $resultList;
-  // 前のページ・次ページ存在チェック
-  $existPrevPage = false;
-  $existNextPage = false;
-  if ($hitCount !== 0) {
-    if($pageNum !== 1) {
-      $existPrevPage = true;
-    }
-    if ($pageNum < $totalPageCount) {
-      $existNextPage = true;
-    }
-  }
-  $retMap["existPrevPage"] = $existPrevPage;
-  $retMap["existNextPage"] = $existNextPage;
-  return $retMap;
-}
 
 /**
  * 住所情報を取得する
@@ -217,7 +169,56 @@ function findAddress($link, $zipcode, $pref, $localGov) {
   return $retList;
 }
 
-// ユーティリティ ----------
+/**
+ * ページング情報を計算する
+ * @param $originalList 検索結果
+ * @param $pageNum 表示ページ数
+ */
+function calcPagingInfo($originalList, $pageNum) {
+  $retMap;
+  // 検索件数
+  $hitCount = count($originalList);
+  $retMap["hitCount"] = $hitCount;
+  //表示件数
+  $dispCount = 10;
+  $retMap["dispCount"] = $dispCount;
+  //総ページ数
+  $totalPageCount = floor($hitCount / $dispCount);
+  if ($hitCount % $dispCount > 0) {
+    $totalPageCount++;
+  }
+  $retMap["totalPageCount"] = $totalPageCount;
+  // 開始インデックス
+  $startIndex = ($pageNum - 1) * $dispCount;
+  $retMap["startIndex"] = $startIndex;
+  // 終了インデックス
+  $endIndex = $startIndex + $dispCount;
+  if($hitCount < $endIndex) {
+    $endIndex = $hitCount;
+  }
+  // 検索結果
+  $resultList = [];
+  for ($index = $startIndex; $index < $endIndex; $index++) {
+    $resultList[] = $originalList[$index];
+  }
+  $retMap["resultList"] = $resultList;
+  // 前のページ・次ページ存在チェック
+  $existPrevPage = false;
+  $existNextPage = false;
+  if ($hitCount !== 0) {
+    if($pageNum !== 1) {
+      $existPrevPage = true;
+    }
+    if ($pageNum < $totalPageCount) {
+      $existNextPage = true;
+    }
+  }
+  $retMap["existPrevPage"] = $existPrevPage;
+  $retMap["existNextPage"] = $existNextPage;
+  return $retMap;
+}
+
+// ユーティリティ ==========
 /**
  * 必須チェックを行う
  * @param $value 入力値
