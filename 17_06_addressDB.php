@@ -2,7 +2,7 @@
 /**
  * 課題番号：17-6
  * 住所検索をDBを使用して作成する。
- * 接続先URL：http://localhost:80/codecamp/17_6_addressDB.php
+ * 接続先URL：http://localhost:80/codecamp/17_06_addressDB.php
  */
 // 画面入力情報 ==========
 // 郵便番号
@@ -259,6 +259,7 @@ function checkZipcode($value) {
   }
   return $retFlg;
 }
+
 /**
  * データベースコネクションを取得する。
  * @return データベースコネクション
