@@ -45,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $pageNum = intval($_POST["pageNum"]);
     }
     // 入力チェック ----------
-    if (checkInputValue()) {    // 検索処理 ----------
+    if (checkInputValue()) {
+      // 検索処理 ----------
       if ($searchMethod === "zipcode") {
         $resultList = findAddress($link, $zipcode, null, null);
       } else {
