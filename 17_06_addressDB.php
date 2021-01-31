@@ -312,7 +312,7 @@ function getDBLink() {
           $("#searchForm").submit();
         });
 
-        /** 
+        /**
         * [前のページ]リンククリック時の処理
         */
         $("#prevPageLink").click(function () {
