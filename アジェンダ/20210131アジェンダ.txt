@@ -1,0 +1,34 @@
+■アジェンダ
+〇質問
+外部キー設定
+　ほかのテーブルとの整合性を保つ設定
+
+■社員テーブル
+氏名　部署コード
+まつけん　1
+みさと　1
+チャチャ　2
+ぶち　3　⇒　エラー
+⇒部署コードに外部キーを設定すると
+　部署テーブルにないIDを設定できない
+
+■部署テーブル
+1　システム開発部
+2　CEO
+
+■ 19-6
+select
+  ct.customer_name,
+  sum(gt.price * odt.quantity)
+from
+  order_table ot
+  inner join order_detail_table odt
+  on ot.order_id = odt.order_idorder_id
+  inner join goods_table gt
+  on ot.goods_id = odt.goods_id
+  inner join customer_table ct
+  on ot.customer_id = ct.customer_id
+group by ct.customer_name
+⇒A5SQL
+
+　

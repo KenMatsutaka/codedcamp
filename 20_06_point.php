@@ -29,7 +29,8 @@ if ($link = mysqli_connect($host, $user, $passwd, $dbname)) {
    // クエリ実行
   if ($result = mysqli_query($link, $sql)) {
     // １件取得
-    $row = mysqli_fetch_assoc($result);
+    $row = mysqli_fetch_assoc($result); //結果の連想配列にする
+    // $row = array('point' => 900);
        // 変数に格納
        if (isset($row['point']) === TRUE) {
            $point = $row['point'];

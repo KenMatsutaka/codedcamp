@@ -11,7 +11,15 @@ $fileNames = [];
     // $_FILES[【パラメータ名】]['tmp_name']にアップロードファイルがある
     // 一時的に格納されているのでそれを任意の場所に移動する
     move_uploaded_file($_FILES['uploadFile']['tmp_name'], "./img/".$_FILES['uploadFile']['name']);
+    // $_FILES = 
+    // {
+    //   'uploadFile1':{"tmp_name": ファイル情報, hoge:""...}
+    // },
+    // {
+    //   'uploadFile2':{"tmp_name": ファイル情報, hoge:""...}
+    // }
   }
+
 }
 // ./imgディレクトリ内のファイル情報を表示
 $fileNames = findFileNames("./img");

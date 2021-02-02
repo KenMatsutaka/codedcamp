@@ -32,7 +32,6 @@ $commentList = findComment($link);
 // DBコネクションクローズ
 mysqli_close($link);
 // メイン処理 終了 ------------
-
 /**
  * 入力項目のチェック処理を行う。
  * @return 判定結果 true:OK false:NG
