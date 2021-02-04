@@ -15,7 +15,7 @@ COMMENT 'ドリンクテーブル';
 --DROP TABLE DRINK_TBL;
 
 INSERT INTO DRINK_TBL (DRINK_NAME, PRICE, INSERT_DATE, UPDATE_DATE, OPEN_STATUS, UPLOAD_FILE_NAME) VALUES
-("ドクターペッパー", 130, now(), now(), 1, "test.jpeg");
+('ドクターペッパー', 130, now(), now(), 1, 'test.jpeg');
 
 --在庫テーブル
 CREATE TABLE STOCK_TBL
