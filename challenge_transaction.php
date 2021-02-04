@@ -1,8 +1,8 @@
 <?php
 $host = 'localhost';
-$user = 'codecamp38342';
-$passwd = 'codecamp38342';
-$dbname = 'codecamp38342';
+$user = 'root';
+$passwd = '';
+$dbname = 'codecamp';
 $customer_id = 1;
 $message = '';
 $point = 0;
@@ -65,8 +65,8 @@ if ($link = mysqli_connect($host,$user,$passwd,$dbname)) {
         if (mysqli_query($link,$sql) === TRUE) {
             
             // point_customer_tableの顧客保有ポイントをUPDTE
-           // $sql = 'UPDATE point_customer_table SET point =' .$point - $gift_point. 'WHERE customer_id = \''.$customer_id.'\'';//
-            $sql = 'UPDATE point_customer_table SET point = 50 WHERE customer_id = 1';
+            
+            $sql = 'UPDATE point_customer_table SET point =' .$point - $gift_point. ' WHERE customer_id =' .$customer_id;
             if (mysqli_query($link,$sql) !== TRUE) {
                  $err_msg[] = 'SQL失敗:' . $sql;
             }
@@ -81,7 +81,18 @@ if ($link = mysqli_connect($host,$user,$passwd,$dbname)) {
             mysqli_rollback($link);
             
         }
-        
+
+        $sql = 'SELECT point FROM point_customer_table WHERE customer_id = ' . $customer_id; 
+        if ($result = mysqli_query($link, $sql)) { 
+            $row = mysqli_fetch_assoc($result); 
+            if (isset($row['point']) === TRUE) { 
+                $point = $row['point'];
+            }
+        } else {
+            $err_msg[] = 'SQL失敗:' . $sql;
+        }
+        mysqli_free_result($result);
+            
     }else {
         
     }
@@ -89,7 +100,6 @@ if ($link = mysqli_connect($host,$user,$passwd,$dbname)) {
     
     $sql = 'SELECT point_gift_id, name, point FROM point_gift_table';
     if ($result = mysqli_query($link, $sql)) {
-    print 'misa';
         $i = 0;   
         while($row = mysqli_fetch_assoc($result)) {
             $point_gift_list[$i]['point_gift_id'] = htmlspecialchars($row['point_gift_id'], ENT_QUOTES, 'UTF-8');
@@ -143,3 +153,5 @@ if ($link = mysqli_connect($host,$user,$passwd,$dbname)) {
        </section>
     </body>
     </html>
+
+
