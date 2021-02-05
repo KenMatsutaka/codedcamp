@@ -31,6 +31,8 @@ $change_status;
 
 
 // 画面出力情報 ==========
+// サクセスメッセージ
+$success_message="";
 // エラーメッセージ情報
 $error_messages = [];
 // 一覧情報
@@ -122,7 +124,7 @@ mysqli_close($link);
  * @param $drinkInfo ドリンク情報
  */
 function saveDrinkInfo($link, $drinkInfo) {
-    global $error_messages;
+    global $success_message, $error_messages;
     //システム日付
     $date = date('Y-m-d H:i:s');
     //ドリンク情報登録
@@ -141,6 +143,8 @@ function saveDrinkInfo($link, $drinkInfo) {
             // アップロードファイルの格納
             mkdir("./../img/".$drinkId, 0777);
             move_uploaded_file($drinkInfo["upload_file"]["tmp_name"], "./../img/".$drinkId."/".$drinkInfo["upload_file"]["name"]);
+            // サクセスメッセージ
+            $success_message = "ドリンクの登録が完了しました。";
         } else {
             $error_messages[] = "SQL実行失敗:".$stockQuery;
         }
@@ -160,7 +164,7 @@ function saveDrinkInfo($link, $drinkInfo) {
  * @param $stockInfo 在庫情報
  */
 function saveStock($link, $stockInfo) {
-    global $error_messages;
+    global $success_message, $error_messages;
     //システム日付
     $date = date('Y-m-d H:i:s');
     //ドリンク情報登録
@@ -170,7 +174,10 @@ function saveStock($link, $stockInfo) {
     $stockQuery .= "     UPDATE_DATE = '".$date."' ";
     $stockQuery .= " WHERE DRINK_ID = ".$stockInfo["drink_id"].";";
     $result = mysqli_query($link, $stockQuery);
-    if ($result === false) {
+    
+    if ($result === true) {
+        $success_message = "在庫の更新が完了しました。";
+    } else {
         $error_messages[] = "SQL実行失敗:".$stockQuery;
     }
     if (count($error_messages) === 0) {
@@ -186,7 +193,7 @@ function saveStock($link, $stockInfo) {
  * @param $openStatusInfo 公開ステータス情報
  */
 function saveOpenStatusInfo($link, $openStatusInfo) {
-    global $error_messages;
+    global $success_message, $error_messages;
     // システム日付
     $date = date('Y-m-d H:i:s');
     // 公開ステータス更新
@@ -196,7 +203,9 @@ function saveOpenStatusInfo($link, $openStatusInfo) {
     $openStatusQuery .= "     UPDATE_DATE = '".$date."'";
     $openStatusQuery .= " WHERE DRINK_ID = ".$openStatusInfo["drink_id"].";";
     $result = mysqli_query($link, $openStatusQuery);
-    if ($result === false) {
+    if ($result === true) {
+        $success_message = "ステータスの更新が完了しました。";
+    } else {
         $error_messages[] = "SQL実行失敗:".$openStatusQuery;
     }
     if (count($error_messages) === 0) {
@@ -346,12 +355,16 @@ function getDBLink() {
         .error_message {
             color: #FF0000;
         }
+        .success_message {
+            color: #0000FF;
+        }
     </style>
 </head>
 <body>
     <h1>自動販売機管理ツール</h1>
+    <p class="success_message"><?php print $success_message; ?></p>
     <?php foreach($error_messages as $error_message) { ?>
-        <p class="error_message"><?php print $error_message ?></p>
+        <p class="error_message"><?php print $error_message; ?></p>
     <?php } ?>
     <section>
         <h2>新規商品追加</h2>
