@@ -63,14 +63,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         saveDrinkInfo($link, $drinkInfo);
     }
 }
-//　一覧情報取得
-
+// 一覧情報取得
+$drinkList = findAllDrinkInfo($link);
 
 // DBコネクションクローズ
 mysqli_close($link);
 
 // 画面固有関数 ==========
+/**
+ * ドリンク情報を取得する。
+ * @param $link DBコネクション
+ * @return ドリンク情報
+ */
+function findAllDrinkInfo($link) {
+    $retList = [];
+    $query =  " SELECT ";
+    $query .= "   dt.DRINK_ID,";
+    $query .= "   dt.DRINK_NAME,";
+    $query .= "   dt.PRICE,";
+    $query .= "   dt.OPEN_STATUS,";
+    $query .= "   st.STOCK_COUNT";
+    $query .= " FROM DRINK_TBL dt";
+    $query .= " INNER JOIN STOCK_TBL st";
+    $query .= " ON dt.DRINK_ID = st.DRINK_ID";
+    $query .= " ORDER BY st.DRINK_ID DESC";
 
+    $result = mysqli_query($link, $query);
+    // 検索結果の設定
+    while ($row = mysqli_fetch_array($result)) {
+        $rowMap = [];
+        // ドリンクID
+        $rowMap["drink_id"] = $row["DRINK_ID"];
+        // ドリンク名
+        $rowMap["drink_name"] = $row["DRINK_NAME"];
+        // 値段
+        $rowMap["price"] = $row["PRICE"];
+        // 公開ステータス
+        $rowMap["open_status"] = $row["OPEN_STATUS"];
+        // 在庫数
+        $rowMap["stock_count"] = $row["STOCK_COUNT"];
+        $retList[] = $rowMap;
+    }
+    // メモリのクリア
+    mysqli_free_result($result);
+    return $retList;
+}
 /**
  * @param $link DBコネクション
  * @param $drinkInfo ドリンク情報
@@ -198,7 +235,7 @@ function getDBLink() {
         .status_false {
             background-color: #A9A9A9;
         }
-        .errorMessage {
+        .error_message {
             color: #FF0000;
         }
     </style>
@@ -206,7 +243,7 @@ function getDBLink() {
 <body>
     <h1>自動販売機管理ツール</h1>
     <?php foreach($error_messages as $error_message) { ?>
-        <p class="errorMessage"><?php print $error_message ?></p>
+        <p class="error_message"><?php print $error_message ?></p>
     <?php } ?>
     <section>
         <h2>新規商品追加</h2>
@@ -236,22 +273,24 @@ function getDBLink() {
                 <th>在庫数</th>
                 <th>ステータス</th>
             </tr>
-            <tr class="status_false">
-                <form method="post">
-                    <td><img src="./img/dfdda71e2596db15834f072332515d33.png"></td>
-                    <td class="drink_name_width">グレープ</td>
-                    <td class="text_align_right">100円</td>
-                    <td><input type="text"  class="input_text_width text_align_right" name="update_stock" value="90">個&nbsp;&nbsp;<input type="submit" value="変更"></td>
-                    <input type="hidden" name="drink_id" value="145">
-                    <input type="hidden" name="sql_kind" value="update">
-                </form>
-                <form method="post">
-                    <td><input type="submit" value="非公開 → 公開"></td>
-                    <input type="hidden" name="change_status" value="1">
-                    <input type="hidden" name="drink_id" value="145">
-                    <input type="hidden" name="sql_kind" value="change">
-                </form>
-            <tr>
+            <?php foreach($drinkList as $drink) {?>
+                <tr class="<?php if($drink["open_status"] === "0") {print "status_false";}?>">
+                    <form method="post">
+                        <td><img src="./img/dfdda71e2596db15834f072332515d33.png"></td>
+                        <td class="drink_name_width"><?php print $drink["drink_name"]?></td>
+                        <td class="text_align_right"><?php print $drink["price"]?></td>
+                        <td><input type="text"  class="input_text_width text_align_right" name="update_stock" value="<?php print $drink["stock_count"]?>">個&nbsp;&nbsp;<input type="submit" value="変更"></td>
+                        <input type="hidden" name="drink_id" value="<?php print $drink["drink_id"]?>">
+                        <input type="hidden" name="sql_kind" value="update">
+                    </form>
+                    <form method="post">
+                        <td><input type="submit" value="<?php print $drink["open_status"] === "0" ? "非公開 → 公開" : "公開 → 非公開";?>"></td>
+                        <input type="hidden" name="change_status" value="<?php print $drink["open_status"] === "0" ? "1" : "0";?>">
+                        <input type="hidden" name="drink_id" value="<?php print $drink["drink_id"]?>">
+                        <input type="hidden" name="sql_kind" value="change">
+                    </form>
+                <tr>
+            <?php }?>
         </table>
     </section>
 </body>
