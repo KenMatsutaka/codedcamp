@@ -5,6 +5,9 @@
  * URL:http://localhost:80/codecamp/21_1_drink/tool.php
  */
 // 画面入力情報 ==========
+// 実行SQL種類
+$sql_kind;
+// 新規登録 ----------
 // 名前
 $new_name;
 // 値段
@@ -15,8 +18,11 @@ $new_stock;
 $new_img;
 // 公開ステータス
 $new_status;
-// 実行SQL種類
-$sql_kind;
+// 在庫更新 ----------
+// ドリンクID
+$update_drink_id;
+// 在庫数
+$update_stock;
 
 // 画面出力情報 ==========
 // エラーメッセージ情報
@@ -31,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST["sql_kind"])) {
         $sql_kind = $_POST["sql_kind"];
     }
-    //新規登録処理
+    // 新規登録処理
     if ($sql_kind === "insert") {
         // 名前
         if (isset($_POST["new_name"])) {
@@ -61,15 +67,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "open_status" => $new_status
         ];
         saveDrinkInfo($link, $drinkInfo);
+    // 在庫更新
+    } else if ($sql_kind === "update") {
+        // ドリンクID
+        if (isset($_POST["update_drink_id"])) {
+            $update_drink_id = $_POST["update_drink_id"];
+        }
+        // 在庫数
+        if (isset($_POST["update_stock"])) {
+            $update_stock = $_POST["update_stock"];
+        }
+        // FIXME 入力チェック
+        // 在庫情報更新
+        $stockInfo = [
+            "drink_id" => $update_drink_id,
+            "stock_count" => $update_stock
+        ];
+        saveStock($link, $stockInfo);
     }
 }
 // 一覧情報取得
 $drinkList = findAllDrinkInfo($link);
-
 // DBコネクションクローズ
 mysqli_close($link);
 
 // 画面固有関数 ==========
+
+/**
+ * 在庫情報を更新する
+ */
+function saveStock($link, $stockInfo) {
+    global $error_messages;
+    //システム日付
+    $date = date('Y-m-d H:i:s');
+    //ドリンク情報登録
+    mysqli_autocommit($link, false);
+    $stockQuery = " UPDATE STOCK_TBL ";
+    $stockQuery .= " SET STOCK_COUNT = ".$stockInfo["stock_count"].",";
+    $stockQuery .= "     UPDATE_DATE = '".$date."' ";
+    $stockQuery .= " WHERE DRINK_ID = ".$stockInfo["drink_id"].";";
+    $result = mysqli_query($link, $stockQuery);
+    if ($result === false) {
+        $error_messages[] = "SQL実行失敗:".$stockQuery;
+    }
+    if (count($error_messages) === 0) {
+        mysqli_commit($link);
+    } else {
+        mysqli_rollback($link);
+    }
+}
+
 /**
  * ドリンク情報を取得する。
  * @param $link DBコネクション
@@ -86,7 +133,7 @@ function findAllDrinkInfo($link) {
     $query .= " FROM DRINK_TBL dt";
     $query .= " INNER JOIN STOCK_TBL st";
     $query .= " ON dt.DRINK_ID = st.DRINK_ID";
-    $query .= " ORDER BY st.DRINK_ID DESC";
+    $query .= " ORDER BY st.DRINK_ID ASC";
 
     $result = mysqli_query($link, $query);
     // 検索結果の設定
@@ -109,6 +156,7 @@ function findAllDrinkInfo($link) {
     return $retList;
 }
 /**
+ * ドリンク情報を登録する。
  * @param $link DBコネクション
  * @param $drinkInfo ドリンク情報
  */
@@ -280,13 +328,13 @@ function getDBLink() {
                         <td class="drink_name_width"><?php print $drink["drink_name"]?></td>
                         <td class="text_align_right"><?php print $drink["price"]?></td>
                         <td><input type="text"  class="input_text_width text_align_right" name="update_stock" value="<?php print $drink["stock_count"]?>">個&nbsp;&nbsp;<input type="submit" value="変更"></td>
-                        <input type="hidden" name="drink_id" value="<?php print $drink["drink_id"]?>">
+                        <input type="hidden" name="update_drink_id" value="<?php print $drink["drink_id"]?>">
                         <input type="hidden" name="sql_kind" value="update">
                     </form>
                     <form method="post">
                         <td><input type="submit" value="<?php print $drink["open_status"] === "0" ? "非公開 → 公開" : "公開 → 非公開";?>"></td>
                         <input type="hidden" name="change_status" value="<?php print $drink["open_status"] === "0" ? "1" : "0";?>">
-                        <input type="hidden" name="drink_id" value="<?php print $drink["drink_id"]?>">
+                        <input type="hidden" name="change_drink_id" value="<?php print $drink["drink_id"]?>">
                         <input type="hidden" name="sql_kind" value="change">
                     </form>
                 <tr>
