@@ -57,7 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST["new_stock"])) {
             $new_stock = $_POST["new_stock"];
         }
-        // FIXME イメージファイル
+        if (is_uploaded_file($_FILES['new_img']['tmp_name'])) {
+            $new_img = $_FILES['new_img'];
+        }
         // 公開ステータス
         if (isset($_POST["new_status"])) {
             $new_status = $_POST["new_status"];
@@ -68,8 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "drink_name" => $new_name,
             "price" => $new_price,
             "stock" => $new_stock,
-            //FIXME イメージファイル
-            "upload_file_name" => null,
+            "upload_file" => $new_img,
             "open_status" => $new_status
         ];
         saveDrinkInfo($link, $drink_info);
@@ -116,23 +117,35 @@ mysqli_close($link);
 
 // 画面固有関数 ==========
 /**
- * 公開ステータスを更新
+ * ドリンク情報を登録する。
  * @param $link DBコネクション
- * @param $openStatusInfo 公開ステータス情報
+ * @param $drinkInfo ドリンク情報
  */
-function saveOpenStatusInfo($link, $openStatusInfo) {
+function saveDrinkInfo($link, $drinkInfo) {
     global $error_messages;
-    // システム日付
+    //システム日付
     $date = date('Y-m-d H:i:s');
-    // 公開ステータス更新
+    //ドリンク情報登録
     mysqli_autocommit($link, false);
-    $openStatusQuery  = " UPDATE DRINK_TBL ";
-    $openStatusQuery .= " SET OPEN_STATUS = ".$openStatusInfo["open_status"].", ";
-    $openStatusQuery .= "     UPDATE_DATE = '".$date."'";
-    $openStatusQuery .= " WHERE DRINK_ID = ".$openStatusInfo["drink_id"].";";
-    $result = mysqli_query($link, $openStatusQuery);
-    if ($result === false) {
-        $error_messages[] = "SQL実行失敗:".$openStatusQuery;
+    $drinkQuery = "INSERT INTO DRINK_TBL (DRINK_NAME, PRICE, INSERT_DATE, UPDATE_DATE, OPEN_STATUS, UPLOAD_FILE_NAME) VALUES";
+    $drinkQuery .= "('".$drinkInfo["drink_name"]."', ".$drinkInfo["price"].", '".$date."', '".$date."', ".$drinkInfo["open_status"].", '".$drinkInfo["upload_file"]["name"]."');";
+    $result = mysqli_query($link, $drinkQuery);
+    if ($result === true) {
+        // 在庫テーブル
+        $drinkId = mysqli_insert_id($link);
+        $stockQuery = "INSERT INTO STOCK_TBL (DRINK_ID, STOCK_COUNT, INSERT_DATE, UPDATE_DATE) VALUES";
+        $stockQuery .= "(".$drinkId.", ".$drinkInfo["stock"].", '".$date."', '".$date."');";
+        $result = mysqli_query($link, $stockQuery);
+
+        if($result === true) {
+            // アップロードファイルの格納
+            mkdir("./../img/".$drinkId, 0777);
+            move_uploaded_file($drinkInfo["upload_file"]["tmp_name"], "./../img/".$drinkId."/".$drinkInfo["upload_file"]["name"]);
+        } else {
+            $error_messages[] = "SQL実行失敗:".$stockQuery;
+        }
+    } else {
+        $error_messages[] = "SQL実行失敗:".$drinkQuery;
     }
     if (count($error_messages) === 0) {
         mysqli_commit($link);
@@ -168,6 +181,32 @@ function saveStock($link, $stockInfo) {
 }
 
 /**
+ * 公開ステータスを更新
+ * @param $link DBコネクション
+ * @param $openStatusInfo 公開ステータス情報
+ */
+function saveOpenStatusInfo($link, $openStatusInfo) {
+    global $error_messages;
+    // システム日付
+    $date = date('Y-m-d H:i:s');
+    // 公開ステータス更新
+    mysqli_autocommit($link, false);
+    $openStatusQuery  = " UPDATE DRINK_TBL ";
+    $openStatusQuery .= " SET OPEN_STATUS = ".$openStatusInfo["open_status"].", ";
+    $openStatusQuery .= "     UPDATE_DATE = '".$date."'";
+    $openStatusQuery .= " WHERE DRINK_ID = ".$openStatusInfo["drink_id"].";";
+    $result = mysqli_query($link, $openStatusQuery);
+    if ($result === false) {
+        $error_messages[] = "SQL実行失敗:".$openStatusQuery;
+    }
+    if (count($error_messages) === 0) {
+        mysqli_commit($link);
+    } else {
+        mysqli_rollback($link);
+    }
+}
+
+/**
  * ドリンク情報を取得する。
  * @param $link DBコネクション
  * @return ドリンク情報
@@ -179,7 +218,8 @@ function findAllDrinkInfo($link) {
     $query .= "   dt.DRINK_NAME,";
     $query .= "   dt.PRICE,";
     $query .= "   dt.OPEN_STATUS,";
-    $query .= "   st.STOCK_COUNT";
+    $query .= "   st.STOCK_COUNT,";
+    $query .= "   dt.UPLOAD_FILE_NAME";
     $query .= " FROM DRINK_TBL dt";
     $query .= " INNER JOIN STOCK_TBL st";
     $query .= " ON dt.DRINK_ID = st.DRINK_ID";
@@ -197,6 +237,8 @@ function findAllDrinkInfo($link) {
         $rowMap["price"] = $row["PRICE"];
         // 公開ステータス
         $rowMap["open_status"] = $row["OPEN_STATUS"];
+        // ファイル名
+        $rowMap["upload_file_name"] = $row["UPLOAD_FILE_NAME"];
         // 在庫数
         $rowMap["stock_count"] = $row["STOCK_COUNT"];
         $retList[] = $rowMap;
@@ -204,38 +246,6 @@ function findAllDrinkInfo($link) {
     // メモリのクリア
     mysqli_free_result($result);
     return $retList;
-}
-/**
- * ドリンク情報を登録する。
- * @param $link DBコネクション
- * @param $drinkInfo ドリンク情報
- */
-function saveDrinkInfo($link, $drinkInfo) {
-    global $error_messages;
-    //システム日付
-    $date = date('Y-m-d H:i:s');
-    //ドリンク情報登録
-    mysqli_autocommit($link, false);
-    $drinkQuery = "INSERT INTO DRINK_TBL (DRINK_NAME, PRICE, INSERT_DATE, UPDATE_DATE, OPEN_STATUS, UPLOAD_FILE_NAME) VALUES";
-    $drinkQuery .= "('".$drinkInfo["drink_name"]."', ".$drinkInfo["price"].", '".$date."', '".$date."', ".$drinkInfo["open_status"].", '".$drinkInfo["upload_file_name"]."');";
-    $result = mysqli_query($link, $drinkQuery);
-    if ($result === true) {
-        // 在庫テーブル
-        $drinkId = mysqli_insert_id($link);
-        $stockQuery = "INSERT INTO STOCK_TBL (DRINK_ID, STOCK_COUNT, INSERT_DATE, UPDATE_DATE) VALUES";
-        $stockQuery .= "(".$drinkId.", ".$drinkInfo["stock"].", '".$date."', '".$date."');";
-        $result = mysqli_query($link, $stockQuery);
-        if($result === false) {
-            $error_messages[] = "SQL実行失敗:".$stockQuery;
-        }
-    } else {
-        $error_messages[] = "SQL実行失敗:".$drinkQuery;
-    }
-    if (count($error_messages) === 0) {
-        mysqli_commit($link);
-    } else {
-        mysqli_rollback($link);
-    }
 }
 
 // ユーティリティ ==========
@@ -374,7 +384,7 @@ function getDBLink() {
             <?php foreach($drinkList as $drink) {?>
                 <tr class="<?php if($drink["open_status"] === "0") {print "status_false";}?>">
                     <form method="post">
-                        <td><img src="./img/dfdda71e2596db15834f072332515d33.png"></td>
+                        <td><img src="<?php print "./../img/".$drink["drink_id"]."/".$drink["upload_file_name"];?>"></td>
                         <td class="drink_name_width"><?php print $drink["drink_name"]?></td>
                         <td class="text_align_right"><?php print $drink["price"]?></td>
                         <td><input type="text"  class="input_text_width text_align_right" name="update_stock" value="<?php print $drink["stock_count"]?>">個&nbsp;&nbsp;<input type="submit" value="変更"></td>
