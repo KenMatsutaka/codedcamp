@@ -23,6 +23,12 @@ $new_status;
 $update_drink_id;
 // 在庫数
 $update_stock;
+// 公開ステータス更新 ----------
+// ドリンクID
+$change_drink_id;
+// 公開ステータス
+$change_status;
+
 
 // 画面出力情報 ==========
 // エラーメッセージ情報
@@ -58,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         // FIXME 入力チェック
         // ドリンク情報登録
-        $drinkInfo = [
+        $drink_info = [
             "drink_name" => $new_name,
             "price" => $new_price,
             "stock" => $new_stock,
@@ -66,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "upload_file_name" => null,
             "open_status" => $new_status
         ];
-        saveDrinkInfo($link, $drinkInfo);
+        saveDrinkInfo($link, $drink_info);
     // 在庫更新
     } else if ($sql_kind === "update") {
         // ドリンクID
@@ -79,11 +85,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         // FIXME 入力チェック
         // 在庫情報更新
-        $stockInfo = [
+        $stock_info = [
             "drink_id" => $update_drink_id,
             "stock_count" => $update_stock
         ];
-        saveStock($link, $stockInfo);
+        saveStock($link, $stock_info);
+    // 公開ステータス更新
+    } else if($sql_kind === "change") {
+        // ドリンクID
+        if(isset($_POST["change_drink_id"])) {
+            $change_drink_id = $_POST["change_drink_id"];
+        }
+        // 公開ステータス
+        if(isset($_POST["change_status"])) {
+            $change_status = $_POST["change_status"];
+        }
+        // FIXME 入力チェック
+        // 公開ステータス更新
+        $open_status_info = [
+            "drink_id" => $change_drink_id,
+            "open_status" => $change_status
+        ];
+        saveOpenStatusInfo($link, $open_status_info);
     }
 }
 // 一覧情報取得
@@ -92,9 +115,36 @@ $drinkList = findAllDrinkInfo($link);
 mysqli_close($link);
 
 // 画面固有関数 ==========
+/**
+ * 公開ステータスを更新
+ * @param $link DBコネクション
+ * @param $openStatusInfo 公開ステータス情報
+ */
+function saveOpenStatusInfo($link, $openStatusInfo) {
+    global $error_messages;
+    // システム日付
+    $date = date('Y-m-d H:i:s');
+    // 公開ステータス更新
+    mysqli_autocommit($link, false);
+    $openStatusQuery  = " UPDATE DRINK_TBL ";
+    $openStatusQuery .= " SET OPEN_STATUS = ".$openStatusInfo["open_status"].", ";
+    $openStatusQuery .= "     UPDATE_DATE = '".$date."'";
+    $openStatusQuery .= " WHERE DRINK_ID = ".$openStatusInfo["drink_id"].";";
+    $result = mysqli_query($link, $openStatusQuery);
+    if ($result === false) {
+        $error_messages[] = "SQL実行失敗:".$openStatusQuery;
+    }
+    if (count($error_messages) === 0) {
+        mysqli_commit($link);
+    } else {
+        mysqli_rollback($link);
+    }
+}
 
 /**
  * 在庫情報を更新する
+ * @param $link DBコネクション
+ * @param $stockInfo 在庫情報
  */
 function saveStock($link, $stockInfo) {
     global $error_messages;
