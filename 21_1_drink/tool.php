@@ -88,13 +88,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST["update_stock"])) {
             $update_stock = $_POST["update_stock"];
         }
-        // FIXME 入力チェック
-        // 在庫情報更新
-        $stock_info = [
-            "drink_id" => $update_drink_id,
-            "stock_count" => $update_stock
-        ];
-        saveStock($link, $stock_info);
+        // 入力チェック
+        if (checkInputValueForUpdate()){
+            // 在庫情報更新
+            $stock_info = [
+                "drink_id" => $update_drink_id,
+                "stock_count" => $update_stock
+            ];
+            saveStock($link, $stock_info);
+        }
     // 公開ステータス更新
     } else if($sql_kind === "change") {
         // ドリンクID
@@ -166,8 +168,32 @@ function checkInputValueForInsert() {
         $retFlag = true;
     }
     return $retFlag;
-
 }
+
+/**
+ * 在庫更新時の入力チェックを行う。
+ * @return 判定結果 true:OK false:NG
+ */
+function checkInputValueForUpdate() {
+    global $error_messages;
+    global $update_stock;
+    // 在庫数 ----------
+    // 必須チェック
+    if (!checkNotEmpty($update_stock)) {
+        $error_messages[] = "在庫数は必須です。";
+    }
+    // 数字チェック
+    if (!checkNumber($update_stock)) {
+        $error_messages[] = "在庫数は数字で入力して下さい。";
+    }
+    // チェック結果の判定
+    $retFlag = false;
+    if (count($error_messages) === 0) {
+        $retFlag = true;
+    }
+    return $retFlag;
+}
+
 
 /**
  * ドリンク情報を登録する。
