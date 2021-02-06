@@ -15,7 +15,7 @@ $new_price;
 // 個数
 $new_stock;
 //イメージファイル
-$new_img;
+$new_img = null;
 // 公開ステータス
 $new_status;
 // 在庫更新 ----------
@@ -66,16 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST["new_status"])) {
             $new_status = $_POST["new_status"];
         }
-        // FIXME 入力チェック
-        // ドリンク情報登録
-        $drink_info = [
-            "drink_name" => $new_name,
-            "price" => $new_price,
-            "stock" => $new_stock,
-            "upload_file" => $new_img,
-            "open_status" => $new_status
-        ];
-        saveDrinkInfo($link, $drink_info);
+        // 入力チェック
+        if (checkInputValueForInsert()) {
+            // ドリンク情報登録
+            $drink_info = [
+                "drink_name" => $new_name,
+                "price" => $new_price,
+                "stock" => $new_stock,
+                "upload_file" => $new_img,
+                "open_status" => $new_status
+            ];
+            saveDrinkInfo($link, $drink_info);
+        }
     // 在庫更新
     } else if ($sql_kind === "update") {
         // ドリンクID
@@ -118,6 +120,55 @@ $drinkList = findAllDrinkInfo($link);
 mysqli_close($link);
 
 // 画面固有関数 ==========
+/**
+ * 新規登録時の入力項目のチェックを行う。
+ * @return 判定結果 true:OK false:NG
+ */
+function checkInputValueForInsert() {
+    global $error_messages;
+    global $new_name, $new_price, $new_stock, $new_img, $new_status;
+    // 名前 ----------
+    // 必須チェック
+    if (!checkNotEmpty($new_name)) {
+        $error_messages[] = "名前は必須です。";
+    }
+    // 値段 ----------
+    // 必須チェック
+    if (!checkNotEmpty($new_price)) {
+        $error_messages[] = "値段は必須です。";
+    }
+    // 数字チェック
+    if (!checkNumber($new_price)) {
+        $error_messages[] = "値段は数字を入力して下さい。";
+    }
+    // 個数 ----------
+    //　必須チェック
+    if (!checkNotEmpty($new_stock)) {
+        $error_messages[] = "個数は必須です。";
+    }
+    // 数字チェック
+    if (!checkNumber($new_stock)) {
+        $error_messages[] = "個数は数字を入力して下さい。";
+    }
+    // ファイル ----------
+    // 必須チェック
+    if (!checkNotEmpty($new_img)) {
+        $error_messages[] = "ファイルは必須です。";
+    }
+    // 公開ステータス
+    if (!preg_match("/0|1/",$new_status)) {
+        $error_messages[] = "公開ステータスが不正です。";
+    }
+
+    // チェック結果の判定
+    $retFlag = false;
+    if (count($error_messages) === 0) {
+        $retFlag = true;
+    }
+    return $retFlag;
+
+}
+
 /**
  * ドリンク情報を登録する。
  * @param $link DBコネクション
@@ -270,6 +321,21 @@ function checkNotEmpty($value) {
     }
     return $retFlag;
 }
+
+/**
+ * 数字かチェックを行う
+ * @param $value 入力値
+ */
+function checkNumber($value) {
+    $retFlg = true;
+    if (checkNotEmpty($value)) {
+        if (!preg_match("/[0-9]/", $value)) {
+            $retFlg = false;
+        }
+    }
+    return $retFlg;
+}
+
 
 /**
  * 最大文字数以下である事をチェックする。
