@@ -107,13 +107,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if(isset($_POST["change_status"])) {
             $change_status = $_POST["change_status"];
         }
-        // FIXME 入力チェック
-        // 公開ステータス更新
-        $open_status_info = [
-            "drink_id" => $change_drink_id,
-            "open_status" => $change_status
-        ];
-        saveOpenStatusInfo($link, $open_status_info);
+        // 入力チェック
+        if (checkInputVallueChange()) {
+            // 公開ステータス更新
+            $open_status_info = [
+                "drink_id" => $change_drink_id,
+                "open_status" => $change_status
+            ];
+            saveOpenStatusInfo($link, $open_status_info);
+        }
     }
 }
 // 一覧情報取得
@@ -161,7 +163,6 @@ function checkInputValueForInsert() {
     if (!preg_match("/0|1/",$new_status)) {
         $error_messages[] = "公開ステータスが不正です。";
     }
-
     // チェック結果の判定
     $retFlag = false;
     if (count($error_messages) === 0) {
@@ -194,6 +195,24 @@ function checkInputValueForUpdate() {
     return $retFlag;
 }
 
+/**
+ * 公開ステータス更新時の入力項目チェックを行う。
+ * @return 判定結果 true:OK false:NG
+ */
+function checkInputVallueChange() {
+    global $change_status;
+    global $error_messages;
+    // 公開ステータス
+    if (!preg_match("/0|1/",$change_status)) {
+        $error_messages[] = "公開ステータスが不正です。";
+    }
+    // チェック結果の判定
+    $retFlag = false;
+    if (count($error_messages) === 0) {
+        $retFlag = true;
+    }
+    return $retFlag;
+}
 
 /**
  * ドリンク情報を登録する。
@@ -361,7 +380,6 @@ function checkNumber($value) {
     }
     return $retFlg;
 }
-
 
 /**
  * 最大文字数以下である事をチェックする。
