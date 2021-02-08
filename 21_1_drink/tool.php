@@ -9,15 +9,15 @@
 $sql_kind;
 // 新規登録 ----------
 // 名前
-$new_name;
+$new_name = null;
 // 値段
-$new_price;
+$new_price = null;
 // 個数
-$new_stock;
+$new_stock = null;
 //イメージファイル
 $new_img = null;
 // 公開ステータス
-$new_status;
+$new_status = "0";
 // 在庫更新 ----------
 // ドリンクID
 $update_drink_id;
@@ -225,13 +225,13 @@ function saveDrinkInfo($link, $drinkInfo) {
     $date = date('Y-m-d H:i:s');
     //ドリンク情報登録
     mysqli_autocommit($link, false);
-    $drinkQuery = "INSERT INTO DRINK_TBL (DRINK_NAME, PRICE, INSERT_DATE, UPDATE_DATE, OPEN_STATUS, UPLOAD_FILE_NAME) VALUES";
+    $drinkQuery = "INSERT INTO MK_DRINK_TBL (DRINK_NAME, PRICE, INSERT_DATE, UPDATE_DATE, OPEN_STATUS, UPLOAD_FILE_NAME) VALUES";
     $drinkQuery .= "('".$drinkInfo["drink_name"]."', ".$drinkInfo["price"].", '".$date."', '".$date."', ".$drinkInfo["open_status"].", '".$drinkInfo["upload_file"]["name"]."');";
     $result = mysqli_query($link, $drinkQuery);
     if ($result === true) {
         // 在庫テーブル
         $drinkId = mysqli_insert_id($link);
-        $stockQuery = "INSERT INTO STOCK_TBL (DRINK_ID, STOCK_COUNT, INSERT_DATE, UPDATE_DATE) VALUES";
+        $stockQuery = "INSERT INTO MK_STOCK_TBL (DRINK_ID, STOCK_COUNT, INSERT_DATE, UPDATE_DATE) VALUES";
         $stockQuery .= "(".$drinkId.", ".$drinkInfo["stock"].", '".$date."', '".$date."');";
         $result = mysqli_query($link, $stockQuery);
 
@@ -265,12 +265,12 @@ function saveStock($link, $stockInfo) {
     $date = date('Y-m-d H:i:s');
     //ドリンク情報登録
     mysqli_autocommit($link, false);
-    $stockQuery = " UPDATE STOCK_TBL ";
+    $stockQuery = " UPDATE MK_STOCK_TBL ";
     $stockQuery .= " SET STOCK_COUNT = ".$stockInfo["stock_count"].",";
     $stockQuery .= "     UPDATE_DATE = '".$date."' ";
     $stockQuery .= " WHERE DRINK_ID = ".$stockInfo["drink_id"].";";
     $result = mysqli_query($link, $stockQuery);
-    
+
     if ($result === true) {
         $success_message = "在庫の更新が完了しました。";
     } else {
@@ -294,7 +294,7 @@ function saveOpenStatusInfo($link, $openStatusInfo) {
     $date = date('Y-m-d H:i:s');
     // 公開ステータス更新
     mysqli_autocommit($link, false);
-    $openStatusQuery  = " UPDATE DRINK_TBL ";
+    $openStatusQuery  = " UPDATE MK_DRINK_TBL ";
     $openStatusQuery .= " SET OPEN_STATUS = ".$openStatusInfo["open_status"].", ";
     $openStatusQuery .= "     UPDATE_DATE = '".$date."'";
     $openStatusQuery .= " WHERE DRINK_ID = ".$openStatusInfo["drink_id"].";";
@@ -325,8 +325,8 @@ function findAllDrinkInfo($link) {
     $query .= "   dt.OPEN_STATUS,";
     $query .= "   st.STOCK_COUNT,";
     $query .= "   dt.UPLOAD_FILE_NAME";
-    $query .= " FROM DRINK_TBL dt";
-    $query .= " INNER JOIN STOCK_TBL st";
+    $query .= " FROM MK_DRINK_TBL dt";
+    $query .= " INNER JOIN MK_STOCK_TBL st";
     $query .= " ON dt.DRINK_ID = st.DRINK_ID";
     $query .= " ORDER BY st.DRINK_ID ASC";
 
@@ -479,14 +479,14 @@ function getDBLink() {
     <section>
         <h2>新規商品追加</h2>
         <form method="post" enctype="multipart/form-data">
-            <div><label>名前: <input type="text" name="new_name" value=""></label></div>
-            <div><label>値段: <input type="text" name="new_price" value=""></label></div>
-            <div><label>個数: <input type="text" name="new_stock" value=""></label></div>
+            <div><label>名前: <input type="text" name="new_name" value="<?php print $new_name;?>"></label></div>
+            <div><label>値段: <input type="text" name="new_price" value="<?php print $new_price;?>"></label></div>
+            <div><label>個数: <input type="text" name="new_stock" value="<?php print $new_stock?>"></label></div>
             <div><input type="file" name="new_img"></div>
             <div>
                 <select name="new_status">
-                    <option value="0">非公開</option>
-                    <option value="1">公開</option>
+                    <option value="0" <?php print $new_stock === "0" ? "selected":"";?>>非公開</option>
+                    <option value="1" <?php print $new_stock === "1" ? "selected":"";?>>公開</option>
                 </select>
             </div>
             <input type="hidden" name="sql_kind" value="insert">
