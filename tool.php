@@ -1,130 +1,113 @@
 <?php
+//http://localhost:80/codecamp/tool.php
 $new_name = '';
 $new_price = '';
 $new_stock = '';
 $new_img = '';
 $new_status = '';
 $host = 'localhost';
-$username = 'codecamp38342';
-$passwd = 'codecamp38342';
-$dbname = 'codecamp38342';
+$username = 'root';
+$passwd = '';
+$dbname = 'codecamp';
 $drink_data = [];
+$err_msg = [];
 $link = mysqli_connect($host, $username,$passwd, $dbname);
+if ($link) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    if (isset($_POST['sql_kind']) === TRUE) {
+        $sql_kind = $_POST['sql_kind'];
+    }
+    
     //作成日を取得//
     $date = date('Y-m-d H:i:s');
-    //名前・個数・値段の値を取得//
-    if (isset($_POST['new_name']) === TRUE) {
-        $new_name = $_POST['new_name'];
-    }
-    if (isset($_POST['new_price']) === TRUE) {
-        $new_price = $_POST['new_price'];
-    }
-    if (isset($_POST['new_stock']) === TRUE) {
-        $new_stock = $_POST['new_stock'];
-    }
-    //商品画像を取得
-    // FIXME ファイルの情報は後
-    $new_img = '';
-    // if (isset($_POST['new_img']) === TRUE) {
-    //     $new_img = $_POST['new_img'];
-    // }
-    //公開ステータスを取得//
-    if (isset($_POST['new_status']) === TRUE) {
-        $new_status = $_POST['new_status'];
-    }
-    if ($link) {
-        mysqli_set_charset($link,'utf8');
-        //データをまとめる//
-        $data = [
-            // 'drink_id' => $drink_id,
-            'drink_name' => $new_name,
-            'price' => $new_price,
-            'created_date' => $date,
-            'status' => $new_status,
-            'pic' => $new_img
-            ];
-        $query  = 'INSERT INTO drink_table(drink_name, price, created_date, status, pic)';
-        $query .= 'VALUES (\'' .implode('\',\'',$data). '\')';
-        if (mysqli_query($link, $query) === TRUE) {
-            //drink_idのA_Iを取得//
-            $drink_id = mysqli_insert_id($link);
-            // もう一つのINSERT
-            $query  = '';
-        } else {
-            print "SQL実行失敗:".$query;
+    
+    if ($sql_kind === 'insert') {
+        //名前・個数・値段の値を取得//
+        if (isset($_POST['new_name']) === TRUE) {
+            $new_name = $_POST['new_name'];
         }
-    } else {
-        print "DB接続エラー";
-    }
-}
-
-// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    // //作成日を取得//
-    // $date = date('Y-m-d H:i:s');
-    
-    // //名前・個数・値段の値を取得//
-    // if (isset($_POST['new_name']) === TRUE) {
-    //     $new_name = $_POST['new_name'];
-    // }
-    // if (isset($_POST['new_price']) === TRUE) {
-    //     $new_price = $_POST['new_price'];
-    // }
-    // if (isset($_POST['new_stock']) === TRUE) {
-    //     $new_stock = $_POST['new_stock'];
-    // }
-    
-    // //商品画像を取得//
-    // if (isset($_POST['new_img']) === TRUE) {
-    //     $new_img = $_POST['new_img'];
-    // }
-    
-    // //公開ステータスを取得//
-    // if (isset($_POST['new_status']) === TRUE) {
-    //     $new_status = $_POST['new_status'];
-    // }
-    //drink_idのA_Iを取得//
-    // $drink_id = mysqli_insert_id($link);
-    
-    //insertする//
-    // if ($link) {
-        // mysqli_set_charset($link,'utf8');
-        // //データをまとめる//
-        // $data = [
-        //     'drink_id' => $drink_id,
-        //     'drink_name' => $new_name,
-        //     'price' => $new_price,
-        //     'stock' => $new_stock,
-        //     'created_date' => $date,
-        //     'status' => $new_status,
-        //     'pic' => $new_img
-        //     ];
-        // $query = 'INSERT INTO drink_table(drink_id, drink_name, price, created_date, status, pic)
-        //           VALUES (\'' .implode('\',\'',$data). '\')';
-    　　　//$query = 'INSERT INTO drink_table(drink_id, drink_name, price, created_date, status, pic)';
-        //   if (mysqli_query($link, $query) === TRUE) {
-        //     print 'insert成功';
-        // }   
+        if (isset($_POST['new_price']) === TRUE) {
+            $new_price = $_POST['new_price'];
+        }
+        if (isset($_POST['new_stock']) === TRUE) {
+            $new_stock = $_POST['new_stock'];
+        }
+        //商品画像を取得
+        // FIXME ファイルの情報は後
+        $new_img = '';
+        // if (isset($_POST['new_img']) === TRUE) {
+        //     $new_img = $_POST['new_img'];
+        // }
+        //公開ステータスを取得//
+        if (isset($_POST['new_status']) === TRUE) {
+            $new_status = $_POST['new_status'];
+        }
        
-        // $query = 'SELECT pic.drink_table, drink_name.drink_table, price.drink_table, stock.drink_stock_table, status.drink_table';
-        // $query .= 'FROM dink_table JOIN drink_stock_table';
-        // $query .= 'ON drink_table.drink_id = drink_stock_table.drink_id';
-        
-        // if ($result = mysqli_query($link,$query)) {
-        //     while ($row = mysqli_fetch_array($result)) {
-        //         $drink_data[] = $row;
-        //     }
-        //      mysqli_free_result($result);
-        //      mysqli_close($link);
-        // }else {
-        //     print 'SELECT失敗';
-        // } 
-        
-    // } else {
-    //    print '接続失敗';
-    // }
-// }
+            mysqli_set_charset($link,'utf8');
+            mysqli_autocommit($link, false);
+            //データをまとめる//
+            $data = [
+                // 'drink_id' => $drink_id,
+                'drink_name' => $new_name,
+                'price' => $new_price,
+                'created_date' => $date,
+                'update_date' => $date,
+                'status' => $new_status,
+                'pic' => $new_img
+                ];
+            $query  = 'INSERT INTO drink_table(drink_name, price, created_date, update_date, status, pic)';
+            $query .= ' VALUES (\'' .implode('\',\'',$data). '\')';
+            if (mysqli_query($link, $query) === TRUE) {
+                //drink_idのA_Iを取得//
+                $drink_id = mysqli_insert_id($link);
+                // もう一つのINSERT
+                $query  = "INSERT INTO drink_stock_table(drink_id, stock, created_date, update_date)";
+                $query .= " VALUES ('".$drink_id."','". $new_stock."','".$date."','".$date."')";
+                if (mysqli_query($link, $query) === false) {
+                    $err_msg[] = "SQL実行失敗:".$query;
+                }
+                
+            } else {
+                $err_msg[] = "SQL実行失敗:".$query;
+            }
+            if (count($err_msg) === 0) {
+                mysqli_commit($link);
+            } else {
+                mysqli_rollback($link);
+            }
+            
+        } else if ($sql_kind === 'update') {
+            if (isset($_POST['update_stock']) === TRUE) {
+                $update_stock = $_POST['update_stock'];
+            }
+          $query = "UPDATE drink_stock_table SET stock = '".$update_stock."' WHERE drink_id = '".$drink_id."'";
+          $query = 'SELECT drink_table.pic, drink_table.drink_name, drink_table.price,drink_stock_table.stock, drink_table.status FROM drink_table JOIN drink_stock_table ON drink_table.drink_id = drink_stock_table.drink_id';
+          mysqli_query($link,$query);
+          
+        } else if ($sql_kind === 'change') {
+            $query = '';
+        }
+    }
+    
+    $query = 'SELECT drink_table.pic, drink_table.drink_name, drink_table.price,drink_stock_table.stock, drink_table.status';
+    $query .= ' FROM drink_table JOIN drink_stock_table ON drink_table.drink_id = drink_stock_table.drink_id';
+    
+    if ($result = mysqli_query($link,$query)) {
+        while ($row = mysqli_fetch_array($result)) {
+            $drink_data[] = $row;
+        }
+         mysqli_free_result($result);
+         mysqli_close($link);
+    }else {
+        print 'SELECT失敗';
+        print $query;
+    } 
+} else {
+    $err_msg[] = "DB接続エラー";
+}
+    
+
 
 ?>
 <!DOCTYPE html>
@@ -201,8 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <th>ステータス</th>
             </tr>
             
-            <tr class="status_false">
 <?php foreach($drink_data as $value) { ?>                
+            <tr class="status_false">
                 <form method="post">
                     <td><img src="<?php print htmlspecialchars($value['pic'],ENT_QUOTES,'UTF-8'); ?>"></td>
                     <td class="drink_name_width"><?php print htmlspecialchars($value['drink_name'],ENT_QUOTES,'UTF-8'); ?></td>
@@ -212,14 +195,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="hidden" name="sql_kind" value="update">
                 </form>
                 <form method="post">
+<?php if ($new_status === 0) { ?>                   
                     <td><input type="submit" value="非公開 → 公開"></td>
-                    <td><input type="submit" value="非公開 → 公開"></td>
+<?php } else { ?>                    
+                    <td><input type="submit" value="公開 → 非公開">
+<?php } ?>                    
                     <input type="hidden" name="change_status" value="1">
                     <input type="hidden" name="drink_id" value="">
                     <input type="hidden" name="sql_kind" value="change">
                 </form>
-<?php } ?>             
               <tr>
+<?php } ?>             
         </table>
     </section>
 </body>
