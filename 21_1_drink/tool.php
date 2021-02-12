@@ -265,7 +265,7 @@ function saveStock($link, $stockInfo) {
     $date = date('Y-m-d H:i:s');
     //ドリンク情報登録
     mysqli_autocommit($link, false);
-    $stockQuery = " UPDATE MK_STOCK_TBL ";
+    $stockQuery  = " UPDATE MK_STOCK_TBL ";
     $stockQuery .= " SET STOCK_COUNT = ".$stockInfo["stock_count"].",";
     $stockQuery .= "     UPDATE_DATE = '".$date."' ";
     $stockQuery .= " WHERE DRINK_ID = ".$stockInfo["drink_id"].";";

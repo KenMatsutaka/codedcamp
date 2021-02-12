@@ -8,7 +8,7 @@
 // ドリンクID
 $drink_id;
 // 金額
-$money;
+$money = "";
 // 値段
 $price;
 
@@ -34,17 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST["price"])) {
         $price = $_POST["price"];
     }
-    // FIXME 入力チェック
-    $saveInfo = [
-        "drink_id" => $drink_id
-    ];
-    // FIXME テスト用にコメントアウト
-    $saveResult = saveBuyInfo($link, $saveInfo);
-    if ($saveResult === true) {
-      // 次画面へ遷移
-      header("Location: result.php?drink_id=".$drink_id."&money=".$money);
+    // 入力チェック
+    if (checkInputValue()) {
+        $saveInfo = [
+            "drink_id" => $drink_id
+        ];
+        $saveResult = saveBuyInfo($link, $saveInfo);
+        if ($saveResult === true) {
+          // 次画面へ遷移
+          header("Location: result.php?drink_id=".$drink_id."&money=".$money);
+        }
     }
-
 }
 // 一覧情報
 $drinkList = findDrinkList($link);
@@ -52,6 +52,35 @@ $drinkList = findDrinkList($link);
 mysqli_close($link);
 
 // 画面固有関数 ==========
+/**
+ * 入力チェックを行う。
+ * @return 判定結果 true:OK false:NG
+ */
+function checkInputValue() {
+    global $error_messages;
+    global $money, $price;
+    // 金額 ----------
+    // 必須チェック
+    if (!checkNotEmpty($money)) {
+        $error_messages[] = "金額は必須です。";
+    }
+    // 数値チェック
+    if (!checkNumber($money)) {
+        $error_messages[] = "金額は数字で入力してください。";
+    }
+    // 入金不足チェック
+    if (checkNotEmpty($money) && checkNumber($money)) {
+        if ($money < $price) {
+            $error_messages[] = "金額が足りません。";
+        }
+    }
+    // チェック結果の判定
+    $retFlag = false;
+    if (count($error_messages) === 0) {
+        $retFlag = true;
+    }
+    return $retFlag;
+}
 /**
  * 購入情報の登録を行う。
  * @param $link DBコネクション
@@ -256,6 +285,9 @@ function getDBLink() {
         #submit {
             clear: both;
         }
+        .error_message {
+            color: #FF0000;
+        }
 
     </style>
 </head>
@@ -265,9 +297,12 @@ function getDBLink() {
         <p class="error_message"><?php print $error_message; ?></p>
     <?php } ?>
     <form method="post">
-        <div>金額<input type="text" name="money" value=""></div>
+        <div>金額<input type="text" name="money" value="<?php print $money;?>"></div>
         <div id="flex">
-            <?php foreach($drinkList as $drink) {?>
+            <?php 
+                $firstFlag = true;
+                foreach($drinkList as $drink) {
+            ?>
                 <div class="drink">
                     <span class="img_size"><img src="./../img/<?php print $drink["drink_id"];?>/<?php print $drink["file_name"]?>"></span>
                     <span><?php print $drink["drink_name"];?></span>
@@ -275,7 +310,7 @@ function getDBLink() {
                     <?php if ($drink["stock"] === 0) {?>
                         <span class="red">売り切れ</span>
                     <?php } else {?>
-                        <input type="radio" name="drink_id" value="<?php print $drink["drink_id"];?>">
+                        <input type="radio" name="drink_id" <?php if($firstFlag) {print "checked"; $firstFlag = false;}?> value="<?php print $drink["drink_id"];?>">
                         <input type="hidden" name="price" value="<?php print $drink["price"]?>">
                     <?php }?>
                 </div>

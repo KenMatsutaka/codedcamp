@@ -4,7 +4,7 @@
  * 画面:自動販売機結果画面
  * URL:http://localhost:80/codecamp/21_1_drink/result.php
  */
-// 画面出力情報
+// 画面出力情報 ==========
 // ドリンク情報
 $drink_info = null;
 // おつり
