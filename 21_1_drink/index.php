@@ -4,20 +4,109 @@
  * 画面:購入ページ画面
  * URL:http://localhost:80/codecamp/21_1_drink/index.php
  */
-// 入力項目
-// 出力項目
+// 画面入力情報 ==========
+// ドリンクID
+$drink_id;
+// 金額
+$money;
+// 値段
+$price;
+
+// 画面出力情報 ==========
+// ドリンク一覧情報
 $drinkList = [];
+//エラーメッセージ
+$error_messages = [];
 
 // メイン処理 ==========
 // DBコネクション取得
 $link = getDBLink();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ドリンクID
+    if (isset($_POST["drink_id"])) {
+        $drink_id = $_POST["drink_id"];
+    }
+    // 金額
+    if (isset($_POST["money"])) {
+        $money = $_POST["money"];
+    }
+    // 値段
+    if (isset($_POST["price"])) {
+        $price = $_POST["price"];
+    }
+    // FIXME 入力チェック
+    $saveInfo = [
+        "drink_id" => $drink_id
+    ];
+    // FIXME テスト用にコメントアウト
+    $saveResult = saveBuyInfo($link, $saveInfo);
+    if ($saveResult === true) {
+      // 次画面へ遷移
+      header("Location: result.php?drink_id=".$drink_id."&money=".$money);
+    }
+
 }
 // 一覧情報
 $drinkList = findDrinkList($link);
 // DBコネクションクローズ
 mysqli_close($link);
+
 // 画面固有関数 ==========
+/**
+ * 購入情報の登録を行う。
+ * @param $link DBコネクション
+ * @param $saveInfo 登録情報
+ * @return 更新結果 true:更新成功 false:更新失敗
+ */
+function saveBuyInfo($link, $saveInfo) {
+    global $error_messages;
+    $retFlag = false;
+    //システム日付
+    $date = date('Y-m-d H:i:s');
+    //ドリンク情報登録
+    mysqli_autocommit($link, false);
+    // 在庫情報取得
+    $querySelectStock  = " SELECT DRINK_ID, STOCK_COUNT ";
+    $querySelectStock .= " FROM MK_STOCK_TBL";
+    $querySelectStock .= " WHERE DRINK_ID = ".$saveInfo["drink_id"];
+    $querySelectStock .= " FOR UPDATE;";
+
+    $result = mysqli_query($link, $querySelectStock);
+    // 検索結果の設定
+    $stockList = [];
+    while ($row = mysqli_fetch_array($result)) {
+        $rowMap = [];
+        $rowMap["drink_id"] = $row["DRINK_ID"];
+        $rowMap["stock"] = $row["STOCK_COUNT"];
+        $stockList[] = $rowMap;
+    }
+    $stock = $stockList[0]["stock"] - 1;
+    // 在庫情報更新
+    $queryUpdateStock  = " UPDATE MK_STOCK_TBL ";
+    $queryUpdateStock .= " SET STOCK_COUNT = ".$stock.", UPDATE_DATE = '".$date."'";
+    $queryUpdateStock .= " WHERE DRINK_ID = ".$saveInfo["drink_id"].";";
+    $result = mysqli_query($link, $queryUpdateStock);
+    if ($result === true) {
+        // 購入履歴登録
+        $queryInsertBuyHistory  = " INSERT INTO MK_BUY_HISTORY_TBL (DRINK_ID, BUY_DATE)";
+        $queryInsertBuyHistory .= " VALUE (".$saveInfo["drink_id"].", '".$date."');";
+        $result = mysqli_query($link, $queryInsertBuyHistory);
+        if ($result === true) {
+            $retFlag = true;
+        } else {
+            $error_messages[] = "SQL実行失敗:".$queryInsertBuyHistory;
+        }
+    } else {
+        $error_messages[] = "SQL実行失敗:".$queryUpdateStock;
+    }
+    if (count($error_messages) === 0) {
+        mysqli_commit($link);
+    } else {
+        mysqli_rollback($link);
+    }
+    return $retFlag;
+}
+
 /**
  * ドリンク一覧を取得する。
  * @param $link　DBコネクション
@@ -172,7 +261,10 @@ function getDBLink() {
 </head>
 <body>
     <h1>自動販売機</h1>
-    <form action="result.php" method="post">
+    <?php foreach($error_messages as $error_message) { ?>
+        <p class="error_message"><?php print $error_message; ?></p>
+    <?php } ?>
+    <form method="post">
         <div>金額<input type="text" name="money" value=""></div>
         <div id="flex">
             <?php foreach($drinkList as $drink) {?>
@@ -184,6 +276,7 @@ function getDBLink() {
                         <span class="red">売り切れ</span>
                     <?php } else {?>
                         <input type="radio" name="drink_id" value="<?php print $drink["drink_id"];?>">
+                        <input type="hidden" name="price" value="<?php print $drink["price"]?>">
                     <?php }?>
                 </div>
             <?php }?>
