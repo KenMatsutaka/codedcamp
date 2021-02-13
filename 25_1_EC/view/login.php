@@ -7,7 +7,7 @@
         $(function (){
             // イベントの設定 ==========
             $("#login").click(function () {
-                $("#loginForm").find("[name='action_kind']").val(this.id);
+                setActionKind($("#loginForm"), this.id);
                 $("#loginForm").submit();
             });
         });
@@ -16,10 +16,10 @@
 <body>
     <form id = "loginForm" action="./login_controller.php" method="POST">
         <div>
-            ログインID : <input type="text" name="login_id">
+            ユーザ名 : <input type="text" name="user_name">
         </div>
         <div>
-            パスワード : <input type="text" name="login_password">
+            パスワード : <input type="password" name="password">
         </div>
         <div>
             <input type="button" id="login" value="ログイン">
