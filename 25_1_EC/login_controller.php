@@ -15,8 +15,8 @@ $user_name = "";
 $password = "";
 
 // メイン処理 ==========
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    execMainAction(function ($db_link) {
+execMainAction(function ($db_link) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action_kind = null;
         if (isset($_POST["action_kind"])) {
             $action_kind = $_POST["action_kind"];
@@ -36,11 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 認証処理実行
             $user_info_list = find_user_info($db_link, $user_name, $password);
             if(count($user_info_list) > 0) {
-                print "ログイン成功";
+                // セッション格納
+                $_SESSION["user_info"] = $user_info_list[0];
+                // 次画面遷移
+                header("Location: item_list_controller.php");
             }
         }
-    }, false);
-}
+    }
+}, false);
 // 画面固有の関数 ==========
 
 // 画面読込み

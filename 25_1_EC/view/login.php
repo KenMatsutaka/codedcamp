@@ -14,12 +14,13 @@
     </script>
 </head>
 <body>
+    <h1>ログイン画面</h1>
     <form id = "loginForm" action="./login_controller.php" method="POST">
         <div>
             ユーザ名 : <input type="text" name="user_name">
         </div>
         <div>
-            パスワード : <input type="password" name="password">
+            パスワード : <input type="text" name="password">
         </div>
         <div>
             <input type="button" id="login" value="ログイン">
