@@ -1,6 +1,6 @@
 <?php
 /**
- * ログイン画面コントローラー
+ * ログインコントローラー
  * URL:http://localhost/codecamp/25_1_EC/login_controller.php
  */
 

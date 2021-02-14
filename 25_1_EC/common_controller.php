@@ -1,6 +1,11 @@
 <?php
 require_once "./model/common/db_connection.php";
 
+// 成功メッセージ
+$success_message = "";
+// エラーメッセージ
+$error_messages = [];
+
 /**
  * サーバーサイドの処理を実行する。
  * @param $mainFunc コールバック関数
@@ -8,7 +13,12 @@ require_once "./model/common/db_connection.php";
  */
 function execMainAction($main_func, $check_session = true) {
     session_start();
-    // FIXME ログインチェック
+    if ($check_session) {
+        if(!isset($_SESSION["user_info"])) {
+                // ログイン画面へ遷移
+            header("Location: login_controller.php");
+        }
+    }
     // DBコネクションの取得
     $db_link = getDBLink();
     $main_func($db_link);

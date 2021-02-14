@@ -6,17 +6,22 @@
 /**
  * 公開中の商品情報を取得する。
  * @param $db_link DBコネクション
+ * @param $user_id ユーザID
  * @return 商品情報
  */
-function find_open_items($db_link) {
+function find_open_items($db_link, $user_id) {
     $retList = [];
     $query  = " SELECT ";
-    $query .= "   it.ID,";
-    $query .= "   it.NAME,";
-    $query .= "   it.PRICE,";
-    $query .= "   it.IMG,";
-    $query .= "   it.STATUS,";
-    $query .= "   ist.STOCK";
+    $query .= "   it.ID ,";
+    $query .= "   it.NAME ,";
+    $query .= "   it.PRICE ,";
+    $query .= "   it.IMG ,";
+    $query .= "   it.STATUS ,";
+    $query .= "   ist.STOCK ,";
+    $query .= "   (SELECT COUNT(*)";
+    $query .= "    FROM MK_CART_TBL";
+    $query .= "    WHERE USER_ID = ".$user_id;
+    $query .= "    AND ITEM_ID = it.ID) CART_COUNT";
     $query .= " FROM MK_ITEM_TBL it";
     $query .= " INNER JOIN MK_ITEM_STOCK_TBL ist";
     $query .= " ON it.ID = ist.ITEM_ID";
@@ -32,6 +37,7 @@ function find_open_items($db_link) {
         $rowMap["img"] = $row["IMG"];
         $rowMap["status"] = $row["STATUS"];
         $rowMap["stock"] = $row["STOCK"];
+        $rowMap["cart_count"] = $row["CART_COUNT"];
         $retList[] = $rowMap;
     }
     // メモリのクリア

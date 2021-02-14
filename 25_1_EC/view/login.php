@@ -15,6 +15,7 @@
 </head>
 <body>
     <h1>ログイン画面</h1>
+    <?php require_once "./view/common/message.php";?>
     <form id = "loginForm" action="./login_controller.php" method="POST">
         <div>
             ユーザ名 : <input type="text" name="user_name">
