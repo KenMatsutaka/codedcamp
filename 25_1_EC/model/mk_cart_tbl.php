@@ -13,17 +13,23 @@ function find_cart($db_link, $search_condition, $count_flag = false) {
     if ($count_flag) {
         $query .= "   COUNT(*) RECORD_COUNT";
     } else {
-        $query .= "   ID,";
-        $query .= "   USER_ID,";
-        $query .= "   ITEM_ID,";
-        $query .= "   AMOUNT,";
-        $query .= "   CREATED_DATE,";
-        $query .= "   UPDATE_DATE";
+        $query .= "   MCT.ID CART_ID,";
+        $query .= "   MCT.USER_ID,";
+        $query .= "   MCT.ITEM_ID,";
+        $query .= "   MCT.AMOUNT,";
+        $query .= "   MIT.NAME,";
+        $query .= "   MIT.PRICE,";
+        $query .= "   MIT.IMG,";
+        $query .= "   MIT.STATUS,";
+        $query .= "   MCT.CREATED_DATE,";
+        $query .= "   MCT.UPDATE_DATE";
     }
-    $query .= " FROM MK_CART_TBL";
-    $query .= " WHERE USER_ID = ".$search_condition["user_id"];
+    $query .= " FROM MK_CART_TBL MCT";
+    $query .= " INNER JOIN MK_ITEM_TBL MIT";
+    $query .= " ON MCT.ITEM_ID = MIT.ID";
+    $query .= " WHERE MCT.USER_ID = ".$search_condition["user_id"];
     if (isset($search_condition["item_id"])) {
-        $query .= "AND ITEM_ID = ".$search_condition["item_id"];
+        $query .= "AND MCT.ITEM_ID = ".$search_condition["item_id"];
     }
     $result = mysqli_query($db_link, $query);
     // 検索結果の設定
@@ -32,10 +38,14 @@ function find_cart($db_link, $search_condition, $count_flag = false) {
         if ($count_flag) {
             $rowMap["record_count"] = $row["RECORD_COUNT"];
         } else {
-            $rowMap["id"] = $row["ID"];
+            $rowMap["cart_id"] = $row["CART_ID"];
             $rowMap["user_id"] = $row["USER_ID"];
             $rowMap["item_id"] = $row["ITEM_ID"];
             $rowMap["amount"] = $row["AMOUNT"];
+            $rowMap["name"] = $row["NAME"];
+            $rowMap["price"] = $row["PRICE"];
+            $rowMap["img"] = $row["IMG"];
+            $rowMap["status"] = $row["STATUS"];
             $rowMap["created_date"] = $row["CREATED_DATE"];
             $rowMap["update_date"] = $row["UPDATE_DATE"];
         }

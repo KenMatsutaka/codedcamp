@@ -37,8 +37,10 @@
     <script>
         $(function (){
             // イベント設定
-            $("#cart_link").click(function () {
-                setActionKinf($("to_cart_form"),this.id);
+            $("#to_cart").click(function () {
+                var formObj = $("#to_cart_form");
+                setActionKind(formObj, this.id);
+                formObj.submit();
             });
         });
         /**
@@ -67,7 +69,7 @@
     <div class="flex">
         <?php foreach($open_item_list as $open_item) { ?>
             <div class="item">
-                <span class="img_size"><img src="./img/1/test.jpg"></span>
+                <span class="img_size"><img src="./img/<?php print $open_item["id"];?>/<?php print $open_item["img"];?>"></span>
                 <span><?php print htmlspecialchars($open_item["name"], ENT_QUOTES, 'UTF-8');?></span>
                 <span><?php print htmlspecialchars($open_item["price"], ENT_QUOTES, 'UTF-8');?>円</span>
                 <?php if($open_item["stock"] === "0") {?>
