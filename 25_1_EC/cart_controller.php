@@ -1,0 +1,26 @@
+<?php
+/**
+ * カートコントローラー
+ */
+
+// 共通関数読み込み ==========
+require_once "./common_controller.php";
+require_once "./model/mk_cart_tbl.php";
+
+//画面出力情報 ==========
+
+
+// メイン処理 ==========
+execMainAction(function ($db_link) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action_kind = null;
+        if (isset($_POST["action_kind"])) {
+            $action_kind = $_POST["action_kind"];
+        }
+    }
+    // 一覧情報取得
+});
+// 画面固有の関数 ==========
+
+// 画面読込み ==========
+require_once "./view/login.php";

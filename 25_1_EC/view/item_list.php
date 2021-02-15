@@ -3,15 +3,6 @@
 <head>
     <?php require_once "./view/common/head.php";?>
     <title>商品一覧画面</title>
-    <script>
-        $(function (){});
-        function clickChartBtn(actionKind, itemId) {
-            var formObj = $("#cart_form");
-            setActionKind(formObj, actionKind);
-            $("#item_id").val(itemId);
-            formObj.submit();
-        }
-    </script>
     <style>
         .flex {
             width: 600px;
@@ -43,11 +34,33 @@
             clear: both;
         }
     </style>
+    <script>
+        $(function (){
+            // イベント設定
+            $("#cart_link").click(function () {
+                setActionKinf($("to_cart_form"),this.id);
+            });
+        });
+        /**
+         * [カートに追加][カートから削除]ボタン押下時の処理
+         * @param actionKind 処理種類
+         * @param itemId アイテムID
+         */
+        function clickChartBtn(actionKind, itemId) {
+            var formObj = $("#cart_form");
+            setActionKind(formObj, actionKind);
+            $("#item_id").val(itemId);
+            formObj.submit();
+        }
+    </script>
 </head>
 <body>
     <?php require_once "./view/common/menu.php";?>
     <h1>商品一覧画面</h1>
     <?php require_once "./view/common/message.php";?>
+    <a href="#" id="to_cart">カートへ</a>[<?php print $cart_count;?>]
+    <form id="to_cart_form" action="./cart_controller.php" method="POST">
+    </form>
     <form id="cart_form" method="POST">
         <input type="hidden" id="item_id" name="item_id">
     </form>

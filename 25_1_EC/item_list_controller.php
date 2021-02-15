@@ -9,19 +9,25 @@ require_once "./common_controller.php";
 require_once "./model/mk_item_tbl.php";
 require_once "./model/mk_cart_tbl.php";
 
-//画面出力情報 ==========
+// 画面出力情報 ==========
+// カート件数
+$cart_count = 0;
+// 商品一覧情報
 $open_item_list = [];
 
 // メイン処理 ==========
 execMainAction(function ($db_link) {
-    global $open_item_list,$success_message,$error_messages;
+    global $cart_count, $open_item_list;
+    global $success_message,$error_messages;
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // システム日付
         $date = date('Y-m-d H:i:s');
+        // 処理種類
         $action_kind = null;
         if(isset($_POST["action_kind"])) {
             $action_kind = $_POST["action_kind"];
         }
+        // 商品ID
         $item_id = null;
         if(isset($_POST["item_id"])) {
             $item_id = $_POST["item_id"];
@@ -55,6 +61,9 @@ execMainAction(function ($db_link) {
             }
         }
     }
+    // カート件数
+    $cart_count = find_cart($db_link, ["user_id" => $_SESSION["user_info"]["id"]], true)[0]["record_count"];
+    // 商品一覧情報
     $open_item_list = find_open_items($db_link, $_SESSION["user_info"]["id"]);
 });
 
