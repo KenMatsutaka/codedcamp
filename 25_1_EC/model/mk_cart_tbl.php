@@ -3,11 +3,36 @@
  * カートテーブル(MK_CART_TBL)操作用のファイル
  */
 
- /**
-  * カート情報を取得する。
-  * @param 
-  */
-function find_cart($db_link, $search_condition, $count_flag = false) {
+/**
+ * カートに登録されている商品の合計を取得する。
+ * @param $db_link DBコネクション
+ * @param $user_id ユーザID
+ * @return 合計金額
+ */
+function sum_cart_price($db_link, $user_id) {
+    $ret_num = 0;
+    $query  = " SELECT SUM(mit.PRICE * mct.AMOUNT) TOTAL_PRICE";
+    $query .= " FROM MK_CART_TBL mct";
+    $query .= " INNER JOIN MK_ITEM_TBL mit";
+    $query .= " ON mct.ITEM_ID = mit.ID";
+    $query .= " WHERE mct.USER_ID = {$user_id};";
+    $result = mysqli_query($db_link, $query);
+    // 検索結果の設定
+    while ($row = mysqli_fetch_array($result)) {
+        $ret_num = $row["TOTAL_PRICE"];
+    }
+    // メモリのクリア
+    mysqli_free_result($result);
+   return $ret_num === null ? 0 : $ret_num;
+   ;
+}
+/**
+ * カート情報を取得する。
+ * @param $db_link DBコネクション
+ * @param $user_id ユーザID
+ * @param $count_flag カウントフラグ(default:false)
+ */
+function find_cart($db_link, $user_id, $count_flag = false) {
     $retList = [];
     $query  = " SELECT ";
     if ($count_flag) {
@@ -27,10 +52,7 @@ function find_cart($db_link, $search_condition, $count_flag = false) {
     $query .= " FROM MK_CART_TBL MCT";
     $query .= " INNER JOIN MK_ITEM_TBL MIT";
     $query .= " ON MCT.ITEM_ID = MIT.ID";
-    $query .= " WHERE MCT.USER_ID = ".$search_condition["user_id"];
-    if (isset($search_condition["item_id"])) {
-        $query .= "AND MCT.ITEM_ID = ".$search_condition["item_id"];
-    }
+    $query .= " WHERE MCT.USER_ID = ".$user_id;
     $result = mysqli_query($db_link, $query);
     // 検索結果の設定
     while ($row = mysqli_fetch_array($result)) {

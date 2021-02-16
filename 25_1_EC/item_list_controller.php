@@ -62,7 +62,7 @@ execMainAction(function ($db_link) {
         }
     }
     // カート件数
-    $cart_count = find_cart($db_link, ["user_id" => $_SESSION["user_info"]["id"]], true)[0]["record_count"];
+    $cart_count = find_cart($db_link, $_SESSION["user_info"]["id"], true)[0]["record_count"];
     // 商品一覧情報
     $open_item_list = find_open_items($db_link, $_SESSION["user_info"]["id"]);
 });

@@ -43,15 +43,23 @@
     <?php require_once "./view/common/menu.php";?>
     <h1>カート画面</h1>
     <a href="./item_list_controller.php">商品一覧へ</a>
+    <div>
+        <form method="POST">
+            合計金額:<?php print $total_price;?> 円
+            <?php if(count($cart_item_list) > 0) {?>
+                <input type="button" id="buy_item" value="購入する">
+            <?php }?>
+        </form>
+    </div>
     <?php require_once "./view/common/message.php";?>
     <div class="flex">
         <?php foreach($cart_item_list as $cart_item) { ?>
             <div class="item">
                 <span class="img_size"><img src="./img/<?php print $cart_item["item_id"];?>/<?php print $cart_item["img"];?>"></span>
                 <span><?php print htmlspecialchars($cart_item["name"], ENT_QUOTES, 'UTF-8');?></span>
-                <span><?php print htmlspecialchars($cart_item["price"], ENT_QUOTES, 'UTF-8');?>円</span>
-                <span><?php print htmlspecialchars($cart_item["amount"], ENT_QUOTES, 'UTF-8');?>個</span>
-                <span>合計:<?php print htmlspecialchars($cart_item["price"] * $cart_item["amount"], ENT_QUOTES, 'UTF-8');?>円</span>
+                <span><?php print $cart_item["price"];?>円</span>
+                <span><?php print $cart_item["amount"];?>個</span>
+                <span>小計:<?php print $cart_item["price"] * $cart_item["amount"];?>円</span>
             </div>
         <?php }?>
         <div class="clear">
