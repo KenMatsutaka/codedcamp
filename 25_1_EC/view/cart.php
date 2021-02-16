@@ -11,7 +11,7 @@
         .flex .item {
             //border: solid 1px;
             width: 120px;
-            height: 240px;
+            height: 260px;
             text-align: center;
             margin: 10px;
             float: left;
@@ -37,12 +37,27 @@
     <script>
         $(function (){
         });
+
+        /**
+         * カートからの削除を行う。
+         * @param btn_id ボタンID
+         * @param item_id 商品ID
+         */
+        function removeCart(btn_id, item_id) {
+            var formObj = $("#remoce_cart_form");
+            setActionKind(formObj, btn_id);
+            $("#item_id").val(item_id);
+            formObj.submit();
+        }
     </script>
 </head>
 <body>
     <?php require_once "./view/common/menu.php";?>
     <h1>カート画面</h1>
     <a href="./item_list_controller.php">商品一覧へ</a>
+    <form id="remoce_cart_form" method="POST">
+        <input type="hidden" id="item_id" name="item_id" value="">
+    </form>
     <div>
         <form method="POST">
             合計金額:<?php print $total_price;?> 円
@@ -60,9 +75,11 @@
                 <span><?php print $cart_item["price"];?>円</span>
                 <span><?php print $cart_item["amount"];?>個</span>
                 <span>小計:<?php print $cart_item["price"] * $cart_item["amount"];?>円</span>
+                <span><input type="button" id="remove_cart" value="カートから削除" onclick="removeCart(this.id, <?php print $cart_item['item_id'];?>);"></span>
             </div>
+            <div class="clear">
         <?php }?>
-        <div class="clear">
     </div>
+    
 </body>
 </html>
