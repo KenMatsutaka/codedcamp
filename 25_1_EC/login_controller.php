@@ -16,6 +16,7 @@ $password = "";
 
 // メイン処理 ==========
 execMainAction(function ($db_link) {
+    global $error_messages;
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action_kind = null;
         if (isset($_POST["action_kind"])) {
@@ -32,7 +33,6 @@ execMainAction(function ($db_link) {
                 $password = $_POST["password"];
             }
             // FIXME 入力チェック
-
             // 認証処理実行
             $user_info_list = find_user_info($db_link, $user_name, $password);
             if(count($user_info_list) > 0) {
@@ -40,6 +40,8 @@ execMainAction(function ($db_link) {
                 $_SESSION["user_info"] = $user_info_list[0];
                 // 次画面遷移
                 header("Location: item_list_controller.php");
+            } else {
+                $error_messages[] = "ユーザ名またはパスワードが違います。";
             }
         }
     }

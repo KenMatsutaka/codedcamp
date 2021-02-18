@@ -36,6 +36,12 @@
     </style>
     <script>
         $(function (){
+            // イベント設定
+            $("#buy_item").click(function (){
+                var formObj = $("#buy_item_form");
+                setActionKind(formObj, this.id);
+                formObj.submit();
+            });
         });
 
         /**
@@ -44,7 +50,7 @@
          * @param item_id 商品ID
          */
         function removeCart(btn_id, item_id) {
-            var formObj = $("#remoce_cart_form");
+            var formObj = $("#remove_cart_form");
             setActionKind(formObj, btn_id);
             $("#item_id").val(item_id);
             formObj.submit();
@@ -55,7 +61,9 @@
     <?php require_once "./view/common/menu.php";?>
     <h1>カート画面</h1>
     <a href="./item_list_controller.php">商品一覧へ</a>
-    <form id="remoce_cart_form" method="POST">
+    <form id="buy_item_form" action="./buy_item_controller.php" method="POST">
+    </form>
+    <form id="remove_cart_form" method="POST">
         <input type="hidden" id="item_id" name="item_id" value="">
     </form>
     <div>
@@ -77,9 +85,8 @@
                 <span>小計:<?php print $cart_item["price"] * $cart_item["amount"];?>円</span>
                 <span><input type="button" id="remove_cart" value="カートから削除" onclick="removeCart(this.id, <?php print $cart_item['item_id'];?>);"></span>
             </div>
-            <div class="clear">
         <?php }?>
+        <div class="clear">
     </div>
-    
 </body>
 </html>

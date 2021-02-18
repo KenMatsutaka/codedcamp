@@ -23,8 +23,7 @@ function sum_cart_price($db_link, $user_id) {
     }
     // メモリのクリア
     mysqli_free_result($result);
-   return $ret_num === null ? 0 : $ret_num;
-   ;
+    return $ret_num === null ? 0 : $ret_num;
 }
 /**
  * カート情報を取得する。
@@ -106,7 +105,9 @@ function add_cart($db_link, $save_info) {
 function remove_cart($db_link, $remove_condition) {
     $query  = " DELETE FROM MK_CART_TBL";
     $query .= " WHERE USER_ID = {$remove_condition['user_id']}";
-    $query .= " AND ITEM_ID = {$remove_condition['item_id']};";
+    if (isset($remove_condition["item_id"])) {
+        $query .= " AND ITEM_ID = {$remove_condition['item_id']};";
+    }
     $result = mysqli_query($db_link, $query);
     $save_result_info = ["result" => $result];
     if ($result === true) {
