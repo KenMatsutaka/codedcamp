@@ -15,6 +15,7 @@ function find_user_info($db_link, $user_name, $password) {
     $query .= "   ID,";
     $query .= "   USER_NAME,";
     $query .= "   PASSWORD,";
+    $query .= "   AUTH_KBN,";
     $query .= "   CREATED_DATE,";
     $query .= "   UPDATE_DATE";
     $query .= " FROM MK_USER_TBL";
@@ -27,6 +28,7 @@ function find_user_info($db_link, $user_name, $password) {
         $rowMap["id"] = $row["ID"];
         $rowMap["user_name"] = $row["USER_NAME"];
         $rowMap["password"] = $row["PASSWORD"];
+        $rowMap["auth_kbn"] = $row["AUTH_KBN"];
         $rowMap["created_date"] = $row["CREATED_DATE"];
         $rowMap["update_date"] = $row["UPDATE_DATE"];
         $retList[] = $rowMap;
