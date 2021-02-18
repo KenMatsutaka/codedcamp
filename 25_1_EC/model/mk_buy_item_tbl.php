@@ -4,23 +4,73 @@
  */
 
 /**
- * 購入情報の登録を行う。
+ * 商品コードを元に購入情報を取得する。
  * @param $db_link DBコネクション
- * @param $user_id　ユーザID
- * @param $save_info_list 登録情報リスト
- * @return 登録結果
+ * @param $buy_code 商品コード
+ * @param $購入情報
  */
-function save_buy_item($db_link, $user_id, $save_info_list) {
-    //システム日付
-    $date = date('Y-m-d H:i:s');
-    // 商品コード取得
-    // FIXME 商品コードの取得は別だしにする
-    $query = "SELECT IFNULL(MAX(BUY_CODE),0)+1 SEQ FROM MK_BUY_ITEM_TBL;";
+function find_buy_item_list($db_link, $buy_code) {
+    $ret_list = [];
+    $query  = " SELECT ";
+    $query .= "     mbit.BUY_CODE,";
+    $query .= "     mbit.SEQ,";
+    $query .= "     mit.NAME,";
+    $query .= "     mbit.BUY_PRICE,";
+    $query .= "     mbit.AMOUNT,";
+    $query .= "     mit.IMG,";
+    $query .= "     mbit.CREATED_DATE,";
+    $query .= "     mbit.UPDATE_DATE";
+    $query .= " FROM MK_BUY_ITEM_TBL mbit";
+    $query .= " INNER JOIN MK_ITEM_TBL mit";
+    $query .= " ON  mbit.ITEM_ID = mit.ID";
+    $query .= " WHERE mbit.BUY_CODE = {$buy_code}";
+    $query .= " ORDER BY mbit.SEQ ASC;";
+    $result = mysqli_query($db_link, $query);
+    while ($row = mysqli_fetch_array($result)) {
+        $row_map = [];
+        $row_map["buy_code"] = $row["BUY_CODE"];
+        $row_map["seq"] = $row["SEQ"];
+        $row_map["name"] = $row["NAME"];
+        $row_map["buy_price"] = $row["BUY_PRICE"];
+        $row_map["amount"] = $row["AMOUNT"];
+        $row_map["img"] = $row["IMG"];
+        $row_map["created_date"] = $row["CREATED_DATE"];
+        $row_map["update_date"] = $row["UPDATE_DATE"];
+        $ret_list[] = $row_map;
+    }
+    // メモリのクリア
+    mysqli_free_result($result);
+    return $ret_list;
+}
+
+/**
+ * 商品コード採番する。
+ * @param $db_link DBコネクション
+ * @return 商品コード
+ */
+ function numbering_buy_code($db_link) {
+    $query = "SELECT IFNULL(MAX(BUY_CODE),0)+1 NEW_BUY_CODE FROM MK_BUY_ITEM_TBL FOR UPDATE;";
     $result = mysqli_query($db_link, $query);
     $buy_code = 0;
     while ($row = mysqli_fetch_array($result)) {
-        $buy_code = $row["SEQ"];
+        $buy_code = $row["NEW_BUY_CODE"];
     }
+    // メモリのクリア
+    mysqli_free_result($result);
+    return $buy_code;
+}
+
+/**
+ * 購入情報の登録を行う。
+ * @param $db_link DBコネクション
+ * @param $user_id　ユーザID
+ * @param $buy_code 商品コード
+ * @param $save_info_list 登録情報リスト
+ * @return 登録結果
+ */
+function save_buy_item($db_link, $user_id, $buy_code, $save_info_list) {
+    //システム日付
+    $date = date('Y-m-d H:i:s');
     // 購入情報登録
     $insertQuery  = " INSERT INTO MK_BUY_ITEM_TBL (BUY_CODE, SEQ, USER_ID, ITEM_ID, BUY_PRICE, AMOUNT, CREATED_DATE, UPDATE_DATE)";
     $insertQuery .= " VALUES";
