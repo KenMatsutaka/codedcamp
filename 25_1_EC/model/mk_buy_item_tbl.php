@@ -2,18 +2,38 @@
 /**
  * 購入テーブル(MY_BUY_ITEM_TBL)操作用のファイル
  */
-
 /**
- * 商品コードを元に購入情報を取得する。
+ * 購入した商品の合計金額を取得する。
  * @param $db_link DBコネクション
  * @param $buy_code 商品コード
- * @param $購入情報
+ * @param 購入商品合計金額
+ */
+function sum_buy_price($db_link, $buy_code) {
+    $query  = " SELECT SUM(BUY_PRICE * AMOUNT) TOTAL_PRICE";
+    $query .= " FROM MK_BUY_ITEM_TBL ";
+    $query .= " WHERE BUY_CODE = {$buy_code};";
+    $result = mysqli_query($db_link, $query);
+    $total_price = 0;
+    while ($row = mysqli_fetch_array($result)) {
+        $total_price = $row["TOTAL_PRICE"];
+    }
+    // メモリのクリア
+    mysqli_free_result($result);
+    return $total_price;
+}
+
+/**
+ * 商品コードを元に購入商品情報を取得する。
+ * @param $db_link DBコネクション
+ * @param $buy_code 商品コード
+ * @param 購入商品情報
  */
 function find_buy_item_list($db_link, $buy_code) {
     $ret_list = [];
     $query  = " SELECT ";
     $query .= "     mbit.BUY_CODE,";
     $query .= "     mbit.SEQ,";
+    $query .= "     mit.ID ITEM_ID,";
     $query .= "     mit.NAME,";
     $query .= "     mbit.BUY_PRICE,";
     $query .= "     mbit.AMOUNT,";
@@ -30,6 +50,7 @@ function find_buy_item_list($db_link, $buy_code) {
         $row_map = [];
         $row_map["buy_code"] = $row["BUY_CODE"];
         $row_map["seq"] = $row["SEQ"];
+        $row_map["item_id"] = $row["ITEM_ID"];
         $row_map["name"] = $row["NAME"];
         $row_map["buy_price"] = $row["BUY_PRICE"];
         $row_map["amount"] = $row["AMOUNT"];
@@ -61,7 +82,7 @@ function find_buy_item_list($db_link, $buy_code) {
 }
 
 /**
- * 購入情報の登録を行う。
+ * 購入商品情報の登録を行う。
  * @param $db_link DBコネクション
  * @param $user_id　ユーザID
  * @param $buy_code 商品コード
@@ -71,7 +92,7 @@ function find_buy_item_list($db_link, $buy_code) {
 function save_buy_item($db_link, $user_id, $buy_code, $save_info_list) {
     //システム日付
     $date = date('Y-m-d H:i:s');
-    // 購入情報登録
+    // 購入商品情報登録
     $insertQuery  = " INSERT INTO MK_BUY_ITEM_TBL (BUY_CODE, SEQ, USER_ID, ITEM_ID, BUY_PRICE, AMOUNT, CREATED_DATE, UPDATE_DATE)";
     $insertQuery .= " VALUES";
     $index = 1;

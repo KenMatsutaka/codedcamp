@@ -60,6 +60,7 @@
 <body>
     <?php require_once "./view/common/menu.php";?>
     <h1>カート画面</h1>
+    <?php require_once "./view/common/message.php";?>
     <a href="./item_list_controller.php">商品一覧へ</a>
     <form id="buy_item_form" action="./buy_item_controller.php" method="POST">
     </form>
@@ -74,7 +75,6 @@
             <?php }?>
         </form>
     </div>
-    <?php require_once "./view/common/message.php";?>
     <div class="flex">
         <?php foreach($cart_item_list as $cart_item) { ?>
             <div class="item">

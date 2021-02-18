@@ -10,6 +10,9 @@ require_once "./model/mk_cart_tbl.php";
 require_once "./model/mk_buy_item_tbl.php";
 require_once "./model/mk_item_stock_tbl.php";
 
+// 画面出力情報 ==========
+// 合計金額
+$total_price = 0;
 // 購入商品一覧
 $buy_item_list = [];
 
@@ -32,7 +35,7 @@ execMainAction(function ($db_link) {
  * @db_link DBコネクション
  */
 function exec_buy_item($db_link) {
-    global $buy_item_list;
+    global $total_price, $buy_item_list;
     global $error_messages;
     mysqli_autocommit($db_link, false);
     // カート情報の取得
@@ -48,6 +51,8 @@ function exec_buy_item($db_link) {
             // カート情報の削除
             $remove_result = remove_cart($db_link, ["user_id" => $_SESSION["user_info"]["id"]]);
             if ($remove_result["result"]) {
+                // 合計金額
+                $total_price = sum_buy_price($db_link, $buy_code);
                 // 購入一覧情報の取得
                 $buy_item_list = find_buy_item_list($db_link, $buy_code);
             } else {
