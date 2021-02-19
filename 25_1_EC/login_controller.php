@@ -34,7 +34,7 @@ execMainAction(function ($db_link) {
             }
             // FIXME 入力チェック
             // 認証処理実行
-            $user_info_list = find_user_info($db_link, $user_name, $password);
+            $user_info_list = find_user_info_for_login($db_link, $user_name, $password);
             if(count($user_info_list) > 0) {
                 // セッション格納
                 $_SESSION["user_info"] = $user_info_list[0];
@@ -48,5 +48,5 @@ execMainAction(function ($db_link) {
 }, false);
 // 画面固有の関数 ==========
 
-// 画面読込み
+// 画面読込み ==========
 require_once "./view/login.php";

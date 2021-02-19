@@ -1,5 +1,6 @@
 <?php
 require_once "./model/common/db_connection.php";
+require_once "./model/common/kbn_const.php";
 
 // 成功メッセージ
 $success_message = "";
