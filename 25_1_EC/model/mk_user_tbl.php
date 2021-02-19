@@ -3,7 +3,6 @@
  * ユーザテーブル(MK_USER_TBL)操作用のファイル
  */
 
-
 /**
  * ユーザ情報を取得する。
  * @param $db_link DBコネクション
@@ -11,7 +10,7 @@
  * @return ユーザ情報
  */
 
-function find_user_info_list($db_link, $search_condition) {
+function find_user_list($db_link, $search_condition) {
     $retList = [];
     $query  = " SELECT ";
     $query .= "   ID,";
@@ -68,7 +67,7 @@ function find_user_info_list($db_link, $search_condition) {
  * @param $password パスワード
  * @return ユーザ情報
  */
-function find_user_info_for_login($db_link, $user_name, $password) {
+function find_user_for_login($db_link, $user_name, $password) {
     $retList = [];
     $query  = " SELECT ";
     $query .= "   ID,";

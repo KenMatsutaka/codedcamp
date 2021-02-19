@@ -16,18 +16,18 @@ $auth_kbn = "";
 
 // 画面出力項目 ==========
 // ユーザ一覧情報
-$user_info_list = [];
+$user_list = [];
 
 // メイン処理 ==========
 execMainAction(function ($db_link) {
     global $user_name, $auth_kbn;
-    global $user_info_list;
+    global $user_list;
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action_kind = null;
         if (isset($_POST["action_kind"])) {
             $action_kind = $_POST["action_kind"];
             // [検索]ボタン押下時
-            if ($action_kind === "search_user_info") {
+            if ($action_kind === "search_user") {
                 // ユーザ名 
                 if (isset($_POST["user_name"])) {
                     $user_name = $_POST["user_name"];
@@ -41,7 +41,7 @@ execMainAction(function ($db_link) {
     }
     // 検索処理実行
     $search_condition = ["user_name" => $user_name, "auth_kbn" => $auth_kbn];
-    $user_info_list = find_user_info_list($db_link, $search_condition);
+    $user_list = find_user_list($db_link, $search_condition);
 });
 
 // 画面固有の関数 ==========

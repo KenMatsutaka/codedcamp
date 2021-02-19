@@ -34,10 +34,10 @@ execMainAction(function ($db_link) {
             }
             // FIXME 入力チェック
             // 認証処理実行
-            $user_info_list = find_user_info_for_login($db_link, $user_name, $password);
-            if(count($user_info_list) > 0) {
+            $user_list = find_user_for_login($db_link, $user_name, $password);
+            if(count($user_list) > 0) {
                 // セッション格納
-                $_SESSION["user_info"] = $user_info_list[0];
+                $_SESSION["user_info"] = $user_list[0];
                 // 次画面遷移
                 header("Location: item_list_controller.php");
             } else {

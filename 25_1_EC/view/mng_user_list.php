@@ -21,8 +21,8 @@
     <script>
         $(function (){
             // イベント設定 ----------
-            $("#search_user_info").click(function () {
-                var formObj = $("#search_uesr_info_form");
+            $("#search_user").click(function () {
+                var formObj = $("#search_uesr_form");
                 setActionKind(formObj, this.id);
                 formObj.submit();
             });
@@ -35,7 +35,7 @@
     <?php require_once "./view/common/message.php";?>
     <section>
         <h2>ユーザ検索</h2>
-        <form id="search_uesr_info_form" method="POST">
+        <form id="search_uesr_form" method="POST">
             <div>ユーザ名 : <input type="text" name="user_name" value="<?php print $user_name;?>"></div>
             <div>
                 権限 : 
@@ -50,12 +50,13 @@
                 </label>
             </div>
             <div>
-                <input type="button" id="search_user_info" name="search_user_info" value="検索">
+                <input type="button" id="search_user" name="search_user" value="検索">
             </div>
         </form>
     </section>
     <section>
         <h2>ユーザ一覧</h2>
+        <input type="button" id="create_new_user" name="create_new_user" value="新規作成">
         <table>
             <tr>
                 <th>ユーザID</th>
@@ -64,14 +65,14 @@
                 <th>権限区分</th>
                 <th>操作</th>
             </tr>
-            <?php foreach($user_info_list as $user_info) {?>
+            <?php foreach($user_list as $user) {?>
                 <tr>
-                    <td><?php print $user_info["id"]; ?></td>
-                    <td><?php print htmlspecialchars($user_info["user_name"], ENT_QUOTES, 'UTF-8'); ?></td>
-                    <td><?php print htmlspecialchars($user_info["password"], ENT_QUOTES, 'UTF-8'); ?></td>
-                    <td><?php htmlspecialchars(print AUTH_KBN[$user_info["auth_kbn"]], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php print $user["id"]; ?></td>
+                    <td><?php print htmlspecialchars($user["user_name"], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php print htmlspecialchars($user["password"], ENT_QUOTES, 'UTF-8'); ?></td>
+                    <td><?php htmlspecialchars(print AUTH_KBN[$user["auth_kbn"]], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td>
-                        <input type="button" name="delete_user" value="詳細">
+                        <input type="button" name="show_user" value="詳細">
                         <input type="button" name="delete_user" value="削除">
                     </td>
                 <tr>
