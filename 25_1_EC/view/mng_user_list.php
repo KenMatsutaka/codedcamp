@@ -41,6 +41,13 @@
                 $("#detail_user_id").val(this.id.split("_")[2]);
                 formObj.submit();
             });
+            // [削除]ボタン押下時の処理
+            $(".delete_user_btn").click(function () {
+                var formObj = $("#delete_user_form");
+                setActionKind(formObj, this.name);
+                $("#delete_user_id").val(this.id.sprintf("_"[2]));
+                formObj.submit();
+            });
         });
     </script>
 </head>

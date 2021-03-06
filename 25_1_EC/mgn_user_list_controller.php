@@ -36,6 +36,19 @@ execMainAction(function ($db_link) {
                 if (isset($_POST["auth_kbn"])) {
                     $auth_kbn = $_POST["auth_kbn"];
                 }
+            // [削除]ボタン押下時
+            } else if ($action_kind === "delete_user") {
+                // ユーザID
+                $user_id = null;
+                if (isset($_POST["user_id"])) {
+                    $user_id = $_POST["user_id"];
+                }
+                $delete_result = delete_user($db_link, $user_id);
+                if ($delete_result["result"]) {
+                    $success_message = $delete_result["message"];
+                } else {
+                    $error_messages[] = $delete_result["message"];
+                }
             }
         }
     }

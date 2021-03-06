@@ -4,6 +4,55 @@
  */
 
 /**
+ * ユーザ情報を登録する。
+ * @param $db_link DBコネクション
+ * @param $user_info ユーザ情報
+ */
+function save_user($db_link, $user_info) {
+    $date = date('Y-m-d H:i:s');
+    // FIXME　ユーザ情報登録
+
+}
+
+/**
+ * ユーザ名を元に件数を取得する。
+ * @param $db_link DBコネクション
+ * @param $user_name ユーザ名
+ * @return 件数
+ */
+function count_user($db_link, $user_name) {
+    $query  = " SELECT ";
+    $query .= "     COUNT(*) AS COUNT ";
+    $query .= " FROM MK_USER_TBL";
+    $query .= " WHERE USER_NAME = '{$user_name}';";
+    $result = mysqli_query($db_link, $query);
+    $ret_count = 0;
+    while ($row = mysqli_fetch_array($result)) {
+        $ret_count = $row["COUNT"];
+    }
+    // メモリのクリア
+    mysqli_free_result($result);
+    return $ret_count;
+}
+/**
+  * ユーザIDを元にユーザ情報の削除を行う。
+  * @param $db_link DBコネクション
+  * @param $user_id ユーザID
+  */
+function delete_user($db_link, $user_id) {
+    $query  = "DELETE FROM MK_USER_TBL";
+    $query .= "WHERE ID = {$user_id};";
+    $result = mysqli_query($db_link, $query);
+    $delete_result_info = ["result" => $result];
+    if ($result === true) {
+        $delete_result_info["message"] = "ユーザ情報の削除が完了しました。";
+    } else {
+        $delete_result_info["message"] = "SQL実行失敗:".$query;
+    }
+    return $delete_result_info;
+}
+
+/**
  * ユーザ情報の更新を行う。
  * @param $db_link DBコネクション
  * @param $save_info 更新情報
